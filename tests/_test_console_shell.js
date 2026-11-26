@@ -236,9 +236,15 @@ check(/id="acctSelAll"[^>]*onchange="toggleAcctSelAll\(this\)"/.test(html),
   '表头缺少全选勾选框');
 check(!/id="btnSelectFiltered"/.test(html),
   '「全选筛选结果」独立按钮应已移除（全选只在表头复选框）');
-check(/id="accountActionScope"[^>]*aria-live="polite"/.test(html)
-      && /function updateAccountActionScope\(\)\{[\s\S]*?const scope = acctScopeUids\(\)/.test(script),
-  '账号操作范围提示应与批量操作使用同一份账号集合');
+const accountToolbar = html.slice(html.indexOf('id="accountToolbar"'), html.indexOf('<div id="accounts">'));
+const advancedToolsAt = accountToolbar.indexOf('id="acctAdvancedTools"');
+check(advancedToolsAt > 0 && ['scanDesktop(this)', 'openActivityHistory()', 'openImport()',
+  'exportAccounts(this)', 'testAccounts(this)'].every(handler => {
+    const at = accountToolbar.indexOf('onclick="' + handler + '"');
+    return at >= 0 && at < advancedToolsAt;
+  }), '扫描、签到记录、导入导出和测试应直接显示在账号工具栏');
+check(!/nextbAccountBulkBar|nextb-row-more|next-disabled-empty/.test(html),
+  '账号页应保留原工具栏、行内操作及完整的当前禁用区');
 check(/id="btnAcctMore"[^>]*aria-controls="acctAdvancedTools"/.test(html),
   '收起后的账号操作应仍有可访问的展开入口');
 

@@ -380,12 +380,8 @@ table.account-cards th.acct-check input[type=checkbox]{width:15px;height:15px;
 table.account-cards td[data-label="账号"] .cool-list{display:flex;flex-direction:column;align-items:stretch;gap:2px;max-width:100%;overflow:hidden}
 table.account-cards td[data-label="账号"] .cool-pill{display:block;width:100%;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (min-width:641px){
-  /* 表格宽度跟随容器（width:100%），只有窄到放不下时才横向滚动。上一版写死
-     min-width:1228px，容器只有 1112px 时多出的 116px 被右侧固定的操作列盖住，
-     「总 token / 缓存」两列就压在操作列下面看不见了——看着像表格右侧被裁掉。
-     各列按「实测内容宽 + 12px 内边距」定宽，多余空间全部给「账号」列（昵称
-     允许折行）。定宽列合计 895px，账号列最少 200px → min-width 1095px，
-     1440 宽度的容器（1112px）刚好放得下，不再横向滚动。 */
+  /* 表格跟随容器，窄屏在表内横向滚动。账号列固定宽度，
+     出口和积分两列分摊余量，较长的昵称仍可折行。 */
   table.account-cards{table-layout:fixed;width:100%;min-width:1096px}
   /* 收窄左右内边距：后面那条 html[data-ui="next"] main table td 用了
      padding:10px 12px!important，所以这里也得带 !important 才生效。 */
@@ -407,6 +403,7 @@ table.account-cards td[data-label="账号"] .cool-pill{display:block;width:100%;
     position:sticky;left:100px;z-index:3;background:var(--panel);
     box-shadow:1px 0 0 var(--line);
   }
+  table.account-cards th:nth-child(3){width:184px}
   table.account-cards th:nth-child(1),
   table.account-cards th:nth-child(2),
   table.account-cards th:nth-child(3){z-index:4;background:var(--panel2)}
@@ -724,6 +721,12 @@ a:hover{text-decoration:underline}
   background:var(--panel2);cursor:default;border-color:var(--line);
 }
 .realm-card.gateway-ctrl:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow)}
+.toggle-realm-btn{
+  background:var(--panel);border:1px solid var(--accent);color:var(--accent);
+  padding:8px 18px;font-size:13px;font-weight:600;border-radius:8px;box-shadow:var(--shadow-sm);cursor:pointer;
+  transition:all .15s ease;
+}
+.toggle-realm-btn:hover{background:var(--panel2);box-shadow:var(--shadow-md)}
 .realm-endpoint-info{font-size:12px;color:var(--dim)}
 
 .main-nav{display:inline-flex;gap:4px;background:var(--panel2);padding:4px;border-radius:10px;border:1px solid var(--line)}
@@ -1757,6 +1760,11 @@ button.sec:hover{background:var(--panel2);border-color:var(--line-hover)}
 button.mini{padding:4px 9px;font-size:11px}
 button.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
 button.danger:hover{background:var(--bad);border-color:var(--bad);color:#fff}
+.toggle-realm-btn{
+  background:var(--panel);border-color:var(--line);color:var(--fg);
+  box-shadow:none;border-radius:7px;
+}
+.toggle-realm-btn:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .id-btn.active{background:var(--accent);color:#fff;box-shadow:none}
 .id-btn-group{border-radius:6px}
 .realm-switch button.active#accountsRealmCn{color:var(--think);border-color:var(--think)}
@@ -2329,9 +2337,6 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     "查看版本": "View realm",
     "查看全部请求与筛选": "View all requests and filters",
     "勾选用于一键配置写入客户端。保存后重新一键配置并重启客户端。": "Selection controls which models are written to clients. Save, apply the client configuration again, and restart the client.",
-    "更多操作": "More actions",
-    "已选 {count} 个账号": "{count} accounts selected",
-    "批量操作作用于当前筛选的 {count} 个账号": "Batch actions apply to {count} filtered accounts",
     "一键执行范围：国际版未完成账号 · 国内版": "Run all targets: pending Global accounts and China",
     "外部账号接口 Key": "External account API keys",
     "查看最近媒体任务、模型约束和限额。生成会扣账号积分。": "Review recent media tasks, model constraints and limits. Generation costs account credits.",
@@ -2348,8 +2353,6 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     "没有匹配的设置": "No matching settings",
     "（模型调用）": "(Model access)",
     "模型调用 Key、CodeArts、代理槽、出站身份和网页工具网关。": "Model access keys, CodeArts, proxy slots, outbound identity and web tools.",
-    "分组操作：{group}": "Group actions: {group}",
-    "分组操作": "Group actions",
     '暂无请求记录': 'No requests yet',
     '今日已更新，累计与历史计算中': 'Today is up to date. Calculating totals and history',
     '正在后台计算用量': 'Calculating usage in the background',
@@ -2391,6 +2394,8 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     '每分钟生图上限': 'Images per minute',
     '视频时长上限（秒）': 'Video length cap (seconds)',
     '每 Key 每日积分上限': 'Daily credits per key',
+      '积分总额度 (0 = 不限)': 'Total credit quota (0 = unlimited)',
+      '按「剩余额度」填：勾上后上面的数字是还能用多少，保存时自动换算成总量。': 'Remaining mode: the number above is how much is left; it is converted into a total when saved.',
     '生视频并发': 'Concurrent videos',
     '生视频并发超过上限时新任务<b>先排队</b>（不提交上游、不扣积分），并行任务会尽量分到不同账号上。': 'When the concurrent-video cap is reached, new tasks queue locally (not submitted upstream, no credits spent). Parallel tasks are spread across different accounts.',
     '每 Key 每日积分上限填 0 表示不限。视频时长会与模型目录里的上限取小值。': 'A daily credit cap of 0 means unlimited. The video length cap is combined with each model\'s own limit, whichever is smaller.',
@@ -2506,6 +2511,7 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     '· 已筛选': '· filtered',
     '· 积分明细': '· credit details',
     '· 耗时': '· duration',
+    '⇄ 切换默认出口为【国内版】': '⇄ Switch the default exit to China',
     '。名字带渠道后缀（如': '. Names carrying a channel suffix (such as',
     '。没人引用、又已经不作数的策略会被清掉（每个模型至少留一条，刚取到的那批不动）。取价间隔以': '. Policies nobody references and that are no longer valid get cleaned up (every model keeps at least one, and the batch just fetched is left alone). The fetch interval is counted in',
     '「绑定账号」只统计已启用账号；停用账号会自动释放槽位，重新启用后需重新绑定。在网关页账号表的「出口」下拉中调整绑定。名称留空时按出口自动显示「国家 类型」，点「测试」会补全出口信息并据此命名。': 'Bound accounts counts enabled accounts only; disabling an account releases its slot automatically and you must bind it again after re-enabling. Adjust the binding in the Exit dropdown of the account table on the gateway page. With an empty name the slot shows Country Type from the exit; clicking Test fills in the exit info and names the slot accordingly.',
@@ -2664,6 +2670,8 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     '新导航布局': 'New navigation layout',
     '返回原布局': 'Return to previous layout',
     '切换颜色主题': 'Switch color theme',
+    '切换默认出口为【国内版】': 'Switch the default exit to China',
+    '切换默认出口为【国际版】': 'Switch the default exit to Global',
     '列表，点击上方选项卡即可查看': 'list; click the tab above to view it',
     '刚刚': 'just now',
     '创建': 'Created',
@@ -3660,6 +3668,27 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     '消耗 Token': 'Tokens used',
     '消耗总 Token': 'Total tokens used',
     '消耗积分': 'Credits spent',
+    '数据备份与恢复': 'Data backup and restore',
+    '备份包含账号、设置、用量历史和订阅桥数据。请妥善保管含凭证的 ZIP。': 'The backup includes accounts, settings, usage history, and subscription bridge data. Keep the ZIP private because it contains credentials.',
+    '下载全量备份': 'Download full backup',
+    '导入备份': 'Import backup',
+    '安排恢复': 'Schedule restore',
+    '取消恢复': 'Cancel restore',
+    '正在导出备份…': 'Exporting backup…',
+    '正在上传并校验备份…': 'Uploading and validating backup…',
+    '备份已校验，可安排恢复。': 'Backup validated and ready to restore.',
+    '已安排恢复，重启网关后生效。': 'Restore scheduled for the next gateway restart.',
+    '恢复完成。恢复前的数据已保留。': 'Restore complete. The previous data was retained.',
+    '恢复失败，原数据已保留。': 'Restore failed. The original data was retained.',
+    '已取消恢复。': 'Restore cancelled.',
+    '备份状态暂不可用。': 'Backup status is currently unavailable.',
+    '重启时将用备份替换当前数据。恢复后可能需要使用备份中的面板密码。确定安排恢复？': 'The backup will replace the current data on restart. You may need the panel password in the backup. Schedule restore?',
+    '积分换算': 'Credit conversion',
+    '积分 / 百万 Token': 'credits / 1M tokens',
+    'Token / 积分': 'tokens / credit',
+    '扣分样本': 'charged requests',
+    '按当前区间内同时记录 Token 和实际扣分的成功对话估算。缓存命中和输入输出比例都会影响结果。': 'Estimated from successful chats in the current range that recorded both tokens and a credit charge. Cache hits and the mix of input and output affect the result.',
+    '暂无扣分样本': 'No charged samples',
     '消耗积分 (全出口)': 'Credits spent (all exits)',
     '消费倍率': 'Rate',
     '消费倍率 / 优惠': 'Rate / discount',
@@ -4096,12 +4125,11 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     '猫猫正在旅行途中，请稍后再来查看！': 'The cat is still travelling; check again later!'
   };
   var HANT_PHRASES = {
+      "积分总额度 (0 = 不限)": "積分總額度 (0 = 不限)",
+      "按「剩余额度」填：勾上后上面的数字是还能用多少，保存时自动换算成总量。": "按「剩餘額度」填：勾上後上面的數字是還能用多少，儲存時自動換算成總量。",
     "查看版本": "檢視版本",
     "查看全部请求与筛选": "檢視全部請求與篩選",
     "勾选用于一键配置写入客户端。保存后重新一键配置并重启客户端。": "勾選用於一鍵設定寫入用戶端。儲存後重新一鍵設定並重新啟動用戶端。",
-    "更多操作": "更多操作",
-    "已选 {count} 个账号": "已選 {count} 個帳號",
-    "批量操作作用于当前筛选的 {count} 个账号": "批次操作作用於目前篩選的 {count} 個帳號",
     "一键执行范围：国际版未完成账号 · 国内版": "一鍵執行範圍：國際版未完成帳號 · 國內版",
     "外部账号接口 Key": "外部帳號介面 Key",
     "查看最近媒体任务、模型约束和限额。生成会扣账号积分。": "檢視最近媒體任務、模型限制和限額。生成會扣帳號積分。",
@@ -4118,8 +4146,6 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     "没有匹配的设置": "沒有符合的設定",
     "（模型调用）": "（模型呼叫）",
     "模型调用 Key、CodeArts、代理槽、出站身份和网页工具网关。": "模型呼叫 Key、CodeArts、代理槽、出站身分和網頁工具閘道。",
-    "分组操作：{group}": "群組操作：{group}",
-    "分组操作": "群組操作",
     "详情": "詳情",
     "需重新登录": "需重新登入",
     "即将过期": "即將過期",
@@ -4128,7 +4154,28 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     "语音转写 ASR": "語音轉寫 ASR",
     "今日已更新，累计与历史计算中": "今日已更新，累計與歷史計算中",
     "正在后台计算用量": "正在背景計算用量",
+    "积分换算": "積分換算",
+    "积分 / 百万 Token": "積分 / 百萬 Token",
+    "Token / 积分": "Token / 積分",
+    "扣分样本": "扣分樣本",
+    "按当前区间内同时记录 Token 和实际扣分的成功对话估算。缓存命中和输入输出比例都会影响结果。": "按目前區間內同時記錄 Token 和實際扣分的成功對話估算。快取命中和輸入輸出比例都會影響結果。",
+    "暂无扣分样本": "暫無扣分樣本",
     "统计更新于": "統計更新於",
+    "数据备份与恢复": "資料備份與還原",
+    "备份包含账号、设置、用量历史和订阅桥数据。请妥善保管含凭证的 ZIP。": "備份包含帳號、設定、用量歷史和訂閱橋資料。請妥善保管含憑證的 ZIP。",
+    "下载全量备份": "下載完整備份",
+    "导入备份": "匯入備份",
+    "安排恢复": "安排還原",
+    "取消恢复": "取消還原",
+    "正在导出备份…": "正在匯出備份…",
+    "正在上传并校验备份…": "正在上傳並驗證備份…",
+    "备份已校验，可安排恢复。": "備份已驗證，可安排還原。",
+    "已安排恢复，重启网关后生效。": "已安排還原，重新啟動閘道後生效。",
+    "恢复完成。恢复前的数据已保留。": "還原完成。還原前的資料已保留。",
+    "恢复失败，原数据已保留。": "還原失敗，原資料已保留。",
+    "已取消恢复。": "已取消還原。",
+    "备份状态暂不可用。": "備份狀態暫時無法使用。",
+    "重启时将用备份替换当前数据。恢复后可能需要使用备份中的面板密码。确定安排恢复？": "重新啟動時將以備份取代目前資料。還原後可能需要使用備份中的面板密碼。確定安排還原？",
     "统计更新失败，显示上次结果": "統計更新失敗，顯示上次結果",
     "用量统计失败，请刷新重试": "用量統計失敗，請重新整理後重試",
     "无法读取用量统计": "無法讀取用量統計",
@@ -4262,6 +4309,7 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     "] 已启用": "] 已啟用",
     "· 周期已过": "· 週期已過",
     "—（需手动启用）": "—（需手動啟用）",
+    "⇄ 切换默认出口为【国内版】": "⇄ 切換預設出口為【國內版】",
     "。名字带渠道后缀（如": "。名字帶渠道字尾（如",
     "「账号封禁」需官方申诉；「上游限流」到点自动恢复；「本地停用」需手动启用；「日限额」次日零点恢复": "「帳號封禁」需官方申訴；「上游限流」到點自動恢復；「本地停用」需手動啟用；「日限額」次日零點恢復",
     "「绑定账号」只统计已启用账号；停用账号会自动释放槽位，重新启用后需重新绑定。在网关页账号表的「出口」下拉中调整绑定。名称留空时按出口自动显示「国家 类型」，点「测试」会补全出口信息并据此命名。": "「繫結帳號」只統計已啟用帳號；停用帳號會自動釋放槽位，重新啟用後需重新繫結。在閘道頁帳號表的「出口」下拉中調整繫結。名稱留空時按出口自動顯示「國家 型別」，點「測試」會補全出口資訊並據此命名。",
@@ -4324,6 +4372,8 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     "分钟": "分鐘",
     "分钟)": "分鐘)",
     "分钟取一次价": "分鐘取一次價",
+    "切换默认出口为【国内版】": "切換預設出口為【國內版】",
+    "切换默认出口为【国际版】": "切換預設出口為【國際版】",
     "列表，点击上方选项卡即可查看": "列表，點選上方選項卡即可檢視",
     "创建": "建立",
     "创建 ' + esc(k.created_at) + '": "建立 ' + esc(k.created_at) + '",
@@ -5392,7 +5442,6 @@ if(!window.__NEXT_UI__ && defaultConsoleLayout) {
     if(lang === 'en' || lang === 'zh-Hant'){ restore(document.documentElement); walk(document.documentElement); observeOn(); }
     else { restore(document.documentElement); }
     syncButtons();
-    if(typeof window.updateAccountActionScope === 'function') window.updateAccountActionScope();
   }
   window.selectLang = function(next, evt){
     if(evt){ evt.preventDefault(); evt.stopPropagation(); }
@@ -5680,8 +5729,6 @@ html[data-ui="next"] .realm-card{
   transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;
 }
 html[data-ui="next"] .realm-card:hover{border-color:var(--line-hover)!important;transform:translateY(-1px)}
-html[data-ui="next"] .realm-card.gateway-ctrl{cursor:default!important}
-html[data-ui="next"] .realm-card.gateway-ctrl:hover{transform:none!important;border-color:var(--line)!important;box-shadow:var(--shadow-sm)!important}
 html[data-ui="next"] .realm-card.active{
   border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--accent-soft),var(--shadow-sm)!important;
 }
@@ -5964,33 +6011,29 @@ html[data-ui="next"]{
 }
 
 /* Lightweight surface hierarchy. The fallback keeps old browsers readable. */
-html[data-ui="next"] .main-page > section,
-html[data-ui="next"] .main-page > .card,
-html[data-ui="next"] .main-page > .panel,
-html[data-ui="next"] #pageOverview .console-insight,
+html[data-ui="next"] .main-page:not(:is(#pageOverview,#pageAccounts)) > section,
+html[data-ui="next"] .main-page:not(:is(#pageOverview,#pageAccounts)) > .card,
+html[data-ui="next"] .main-page:not(:is(#pageOverview,#pageAccounts)) > .panel,
 html[data-ui="next"] #pageGateway #gatewayModelsSection{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:var(--nexta-card-radius);
   box-shadow:none;
 }
-html[data-ui="next"] .main-page section{
+html[data-ui="next"] .main-page:not(:is(#pageOverview,#pageAccounts)) section{
   padding:16px 18px;
   margin-bottom:14px;
 }
-html[data-ui="next"] .main-page section section{
+html[data-ui="next"] .main-page:not(:is(#pageOverview,#pageAccounts)) section section{
   background:transparent;
   border:0;
   box-shadow:none;
   padding:0;
   margin:0;
 }
-html[data-ui="next"] .main-page :is(.panel,.card,.console-insight) :is(.panel,.card){
+html[data-ui="next"] .main-page:not(:is(#pageOverview,#pageAccounts)) :is(.panel,.card,.console-insight) :is(.panel,.card){
   background:var(--nexta-soft-fill);
   border:1px solid var(--border);
-  box-shadow:none;
-}
-html[data-ui="next"] .main-page :is(.console-insights,.console-insight,.gw-summary){
   box-shadow:none;
 }
 
@@ -6146,14 +6189,14 @@ html[data-ui="next"] #nextRealmPill.next-realm-muted .next-status-dot{
 }
 
 /* Repeated page titles and tiny page-local navs. IDs and DOM stay intact. */
-html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageAccounts,#pageApi,#pageAnalytics,
+html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageApi,#pageAnalytics,
   #pageTasks,#pageAgents,#pageMedia,#pageLogs) .pagetitle,
-html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageAccounts,#pageApi,#pageAnalytics,
+html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageApi,#pageAnalytics,
   #pageTasks,#pageAgents,#pageMedia,#pageLogs) .pagesub,
 html[data-ui="next"] #gatewayPageHead{
   display:none !important;
 }
-html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageAccounts,#pageApi,#pageAnalytics,
+html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageApi,#pageAnalytics,
   #pageTasks,#pageAgents,#pageMedia,#pageLogs) .next-page-intro{
   margin-bottom:12px;
 }
@@ -6168,267 +6211,13 @@ html[data-ui="next"] #pageGateway .next-gateway-head{
 html[data-ui="next"] #pageGateway .next-gateway-head > div:first-child{
   display:none !important;
 }
-html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageAccounts,#pageApi,#pageAnalytics,
+html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageApi,#pageAnalytics,
   #pageTasks,#pageAgents,#pageMedia,#pageLogs).page-nav-on > .page-sidebar{
   display:none !important;
 }
-html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageAccounts,#pageApi,#pageAnalytics,
+html[data-ui="next"] :is(#pageOverview,#pageGateway,#pageApi,#pageAnalytics,
   #pageTasks,#pageAgents,#pageMedia,#pageLogs).page-nav-on.active{
   display:block !important;
-}
-
-/* Overview: one compact view/exit band, then three KPIs and two charts. */
-html[data-ui="next"] #pageOverview .next-overview-control-bar{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-  margin:0 0 8px;
-  padding:8px 10px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--card);
-}
-html[data-ui="next"] #pageOverview .next-overview-control-label{
-  flex:0 0 auto;
-  color:var(--muted);
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit{
-  order:2;
-  flex:1 1 320px;
-  min-width:0;
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit > div:first-child{
-  display:none !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit > div:nth-child(2){
-  display:flex !important;
-  align-items:center !important;
-  gap:7px !important;
-  min-width:0;
-  margin:0 0 0 auto !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit > div:nth-child(2) > span:first-child{
-  display:none !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit #activeGatewayName{
-  overflow:hidden;
-  color:var(--text) !important;
-  font-size:11.5px !important;
-  font-weight:650 !important;
-  letter-spacing:0 !important;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit > div:last-child{
-  width:min(170px,100%) !important;
-  min-width:130px !important;
-  margin:0 0 0 auto !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-exit #realmPicker{
-  width:100%;
-  min-height:30px;
-  padding:5px 8px !important;
-  font-size:11px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms{
-  display:grid !important;
-  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-  gap:8px !important;
-  margin:0 0 14px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-card{
-  min-width:0;
-  min-height:0 !important;
-  padding:10px 12px !important;
-  border-radius:10px !important;
-  box-shadow:none !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-card:hover{
-  transform:none !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-card > div:first-child{
-  gap:5px !important;
-  margin-bottom:7px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-card > div:last-child{
-  gap:6px !important;
-  align-items:center !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-card .mono{
-  display:none;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-badge-intl,
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-badge-cn,
-html[data-ui="next"] #pageOverview .next-overview-realms .realm-badge-codearts{
-  padding:2px 7px !important;
-  font-size:9px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .credit-summary{
-  gap:3px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .credit-summary > span:first-child{
-  font-size:17px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .credit-summary > span:last-child{
-  overflow:hidden;
-  color:var(--muted) !important;
-  font-size:10px !important;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .credit-summary > span:last-child span{
-  font-size:10px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-realms .badge{
-  flex:0 0 auto;
-  font-size:8.5px !important;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis{
-  margin-bottom:14px;
-  border:1px solid var(--border);
-  border-radius:var(--nexta-card-radius);
-  background:var(--card);
-  overflow:hidden;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis #cards{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:0;
-  margin:0;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card{
-  min-width:0;
-  min-height:0;
-  padding:12px 14px;
-  border:0;
-  border-right:1px solid var(--border);
-  border-radius:0;
-  background:transparent;
-  box-shadow:none;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card:last-child{
-  border-right:0;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card .k{
-  font-size:10px;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card .v{
-  font-size:20px;
-  letter-spacing:-.03em;
-}
-html[data-ui="next"] #pageOverview .next-overview-kpis #schedulerBar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:8px 13px;
-  border-top:1px solid var(--border);
-  color:var(--muted);
-  font-size:10.5px;
-}
-html[data-ui="next"] #pageOverview .next-overview-insights{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-  margin-bottom:14px;
-}
-html[data-ui="next"] #pageOverview .next-overview-insights .console-insight{
-  min-width:0;
-  padding:13px 15px;
-  border:1px solid var(--border);
-  border-radius:var(--nexta-card-radius);
-  background:var(--card);
-}
-html[data-ui="next"] #pageOverview .next-overview-insights .console-insight-head{
-  display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  gap:8px;
-  margin-bottom:8px;
-}
-html[data-ui="next"] #pageOverview .next-overview-insights .console-insight-head h2{
-  margin:0;
-  font-size:13px;
-  font-weight:700;
-}
-html[data-ui="next"] #pageOverview .next-overview-insights .console-insight-note{
-  overflow:hidden;
-  color:var(--muted);
-  font-size:9.5px;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-html[data-ui="next"] #pageOverview .next-overview-insights canvas{
-  display:block;
-  max-width:100%;
-}
-
-/* Recent requests: a single lightweight filter row; the original details stay. */
-html[data-ui="next"] #recentRequestsSection{
-  padding:14px 16px;
-}
-html[data-ui="next"] #recentRequestsSection > .layout-section-head{
-  margin-bottom:9px;
-}
-html[data-ui="next"] #recentRequestsSection > .layout-section-head h2{
-  font-size:13px;
-}
-html[data-ui="next"] #overviewRequestOptions{
-  margin:0 0 10px;
-  border:0;
-  border-radius:0;
-  background:transparent;
-}
-html[data-ui="next"] #overviewRequestOptions > summary{
-  display:none;
-}
-html[data-ui="next"] #overviewRequestOptions > .layout-disclosure-body{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-  padding:0;
-  overflow-x:auto;
-}
-html[data-ui="next"] #overviewRequestOptions .console-filterbar{
-  display:flex;
-  flex:1 1 auto;
-  flex-wrap:nowrap;
-  align-items:center;
-  gap:6px;
-  min-width:0;
-  margin:0;
-  overflow-x:auto;
-  scrollbar-width:thin;
-}
-html[data-ui="next"] #overviewRequestOptions :is(.console-search,input,select,button){
-  flex:0 0 auto;
-  min-height:29px;
-  font-size:10.5px !important;
-}
-html[data-ui="next"] #overviewRequestOptions .console-search{
-  flex:1 1 190px;
-  min-width:150px;
-}
-html[data-ui="next"] #overviewRequestOptions .console-filter-count{
-  flex:0 0 auto;
-  white-space:nowrap;
-}
-html[data-ui="next"] #recentRequestsSection #recent{
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--card);
 }
 
 /* Model catalog: one heading, source badge, compact two-row toolbar, clear table. */
@@ -6623,64 +6412,12 @@ html[data-ui="next"] #pageGateway #modelsTable .catalog-model-row td[data-label=
     width:216px;
     flex-basis:216px;
   }
-  html[data-ui="next"] #pageOverview .next-overview-realms{
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-realms .realm-card:last-child:nth-child(3){
-    grid-column:1/-1;
-  }
   html[data-ui="next"] #pageGateway #modelsTable{
     min-width:920px;
   }
 }
 
 @media (max-width:860px){
-  html[data-ui="next"] #pageOverview .next-overview-control-bar{
-    align-items:flex-start;
-    flex-wrap:wrap;
-    padding:8px 9px;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-control-label{
-    width:100%;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-exit{
-    flex-basis:100%;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-exit > div:nth-child(2){
-    margin-left:0 !important;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-realms{
-    grid-template-columns:1fr !important;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-realms .realm-card:last-child:nth-child(3){
-    grid-column:auto;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #cards{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card:nth-child(2){
-    border-right:0;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card:nth-child(3){
-    grid-column:1/-1;
-    border-top:1px solid var(--border);
-    border-right:0;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-insights{
-    grid-template-columns:1fr;
-  }
-  html[data-ui="next"] #overviewRequestOptions > .layout-disclosure-body{
-    align-items:stretch;
-    flex-direction:column;
-    overflow:visible;
-  }
-  html[data-ui="next"] #overviewRequestOptions .console-filterbar{
-    flex-wrap:wrap;
-    overflow:visible;
-  }
-  html[data-ui="next"] #overviewRequestOptions .console-search{
-    flex:1 1 100%;
-  }
   html[data-ui="next"] #pageGateway #gatewayModelsSection > .model-catalog-toolbar{
     align-items:stretch;
   }
@@ -6707,26 +6444,6 @@ html[data-ui="next"] #pageGateway #modelsTable .catalog-model-row td[data-label=
     right:-2px;
     width:174px;
   }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #cards{
-    grid-template-columns:1fr;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card{
-    border-right:0;
-    border-bottom:1px solid var(--border);
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #cards .card:nth-child(3){
-    grid-column:auto;
-    border-top:0;
-    border-bottom:0;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #schedulerBar{
-    align-items:flex-start;
-    flex-direction:column;
-  }
-  html[data-ui="next"] #pageOverview .next-overview-kpis #schedulerBar > div{
-    flex-wrap:wrap;
-    min-width:0;
-  }
   html[data-ui="next"] #pageGateway #gatewayModelsSection > div:first-child{
     align-items:flex-start;
     flex-direction:column;
@@ -6743,9 +6460,8 @@ html[data-ui="next"] #pageGateway #modelsTable .catalog-model-row td[data-label=
 }
 
 /* --- agent_b --- */
-/* Agent B: accounts, external API and agents. All selectors stay in the Next shell. */
+/* Agent B: external API and agents. All selectors stay in the Next shell. */
 
-html[data-ui="next"] #pageAccounts,
 html[data-ui="next"] #pageApi,
 html[data-ui="next"] #pageAgents{
   --nextb-radius:12px;
@@ -6755,7 +6471,6 @@ html[data-ui="next"] #pageAgents{
   --nextb-code-bg:color-mix(in srgb,var(--panel2) 72%,var(--panel));
 }
 
-html[data-ui="next"] #pageAccounts section,
 html[data-ui="next"] #pageApi section,
 html[data-ui="next"] #pageAgents section{
   background:var(--panel);
@@ -6764,7 +6479,6 @@ html[data-ui="next"] #pageAgents section{
   box-shadow:none;
 }
 
-html[data-ui="next"] #pageAccounts section section,
 html[data-ui="next"] #pageApi section section,
 html[data-ui="next"] #pageAgents section section{
   background:transparent;
@@ -6772,499 +6486,10 @@ html[data-ui="next"] #pageAgents section section{
   box-shadow:none;
 }
 
-html[data-ui="next"] #pageAccounts :is(button,input,select,textarea):focus-visible,
 html[data-ui="next"] #pageApi :is(button,input,select,textarea):focus-visible,
 html[data-ui="next"] #pageAgents :is(button,input,select,textarea):focus-visible{
   outline:2px solid var(--accent);
   outline-offset:2px;
-}
-
-/* Account header and the account list's own title. */
-html[data-ui="next"] #accountsHeader{
-  align-items:center!important;
-  margin-bottom:10px!important;
-  min-height:34px;
-}
-html[data-ui="next"] #accountsHeader #accountsRealmSwitch{
-  display:inline-flex;
-  align-items:center;
-  gap:2px;
-  padding:3px;
-  border:1px solid var(--line);
-  border-radius:9px;
-  background:var(--panel2);
-}
-html[data-ui="next"] #accountsHeader #accountsRealmSwitch button{
-  appearance:none;
-  border:0;
-  border-radius:6px;
-  background:transparent;
-  color:var(--muted);
-  padding:4px 9px;
-  font:inherit;
-  font-size:11px;
-  font-weight:600;
-  cursor:pointer;
-}
-html[data-ui="next"] #accountsHeader #accountsRealmSwitch button[aria-pressed="true"]{
-  background:var(--panel);
-  color:var(--fg);
-  box-shadow:0 1px 3px rgba(16,24,40,.1);
-}
-html[data-ui="next"] #workbuddyAccountsSection > h2{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin:0 0 9px;
-  font-size:12px!important;
-  font-weight:650!important;
-  color:var(--muted)!important;
-}
-html[data-ui="next"] #workbuddyAccountsSection > h2 .disclosure{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  padding:0;
-  border:0;
-  background:transparent;
-  color:var(--fg);
-  font:inherit;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-}
-html[data-ui="next"] #workbuddyAccountsSection > h2 .disclosure-chevron{
-  width:6px;
-  height:6px;
-  border-right:1.5px solid currentColor;
-  border-bottom:1.5px solid currentColor;
-  transform:rotate(45deg);
-  transition:transform .16s ease;
-}
-html[data-ui="next"] #workbuddyAccountsSection > h2 .disclosure[aria-expanded="false"] .disclosure-chevron{
-  transform:rotate(-45deg);
-}
-
-/* Filters stay a quiet single control strip. */
-html[data-ui="next"] #pageAccounts .acct-filterbar{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:7px;
-  margin:0 0 10px;
-  padding:8px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:var(--nextb-soft);
-}
-html[data-ui="next"] #pageAccounts .acct-filterbar .console-search{
-  flex:1 1 190px;
-  min-width:150px;
-}
-html[data-ui="next"] #pageAccounts .acct-filterbar select{
-  flex:0 1 126px;
-  min-width:104px;
-}
-html[data-ui="next"] #pageAccounts .acct-filterbar .console-filter-count{
-  margin-inline-start:auto;
-  color:var(--muted);
-  font-size:10.5px;
-  white-space:nowrap;
-}
-
-/* Account toolbar: primary add, grouped menus, selection-driven bulk bar. */
-html[data-ui="next"] #accountToolbar{
-  display:flex!important;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:6px;
-  margin:0 0 8px!important;
-  padding:7px 8px;
-  border:1px solid var(--line);
-  border-radius:11px;
-  background:var(--panel);
-}
-html[data-ui="next"] #accountToolbar > button:first-of-type{
-  order:1;
-}
-html[data-ui="next"] #accountToolbar > button.sec[onclick="openApiKeyModal()"]{
-  order:2;
-}
-html[data-ui="next"] #accountToolbar > .tb-group:not(.tb-checkin):not(.tb-quick):not(.tb-pool){
-  order:3;
-}
-html[data-ui="next"] #accountToolbar > .tb-group.tb-quick{
-  order:4;
-}
-html[data-ui="next"] #accountToolbar > .tb-group.tb-checkin{
-  order:5;
-}
-html[data-ui="next"] #accountToolbar > .tb-group.tb-pool{
-  order:6;
-}
-html[data-ui="next"] #accountToolbar > .tb-advanced{
-  order:7;
-}
-html[data-ui="next"] #accountToolbar > .tb-group{
-  display:inline-flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:5px;
-  min-width:0;
-}
-html[data-ui="next"] #accountToolbar > button,
-html[data-ui="next"] #accountToolbar .tb-group > button{
-  min-height:30px;
-  padding:5px 10px!important;
-  white-space:nowrap;
-}
-html[data-ui="next"] #accountToolbar > button:first-of-type{
-  padding-inline:14px!important;
-  font-weight:700!important;
-}
-html[data-ui="next"] #accountToolbar #btnAcctMore{
-  order:6;
-  min-height:30px;
-  padding:5px 10px!important;
-  font-size:11.5px;
-  font-weight:600;
-}
-html[data-ui="next"] #accountToolbar .tb-advanced{
-  flex-basis:100%;
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:6px;
-  padding-top:6px;
-  border-top:1px dashed var(--line);
-}
-html[data-ui="next"] #accountToolbar .tb-advanced.is-collapsed{
-  display:none!important;
-}
-html[data-ui="next"] #accountToolbar .tb-group.tb-bulk{
-  display:none!important;
-}
-html[data-ui="next"] #accountToolbar .nextb-menu-wrap{
-  order:3;
-}
-
-html[data-ui="next"] .nextb-menu-wrap{
-  position:relative;
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-  flex:0 0 auto;
-}
-html[data-ui="next"] .nextb-menu-wrap[hidden]{
-  display:none!important;
-}
-html[data-ui="next"] .nextb-menu-toggle{
-  appearance:none;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  min-height:30px;
-  padding:5px 10px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:var(--panel);
-  color:var(--fg);
-  font:inherit;
-  font-size:11.5px;
-  font-weight:600;
-  cursor:pointer;
-}
-html[data-ui="next"] .nextb-menu-toggle:hover{
-  background:var(--panel2);
-  border-color:var(--line-hover);
-}
-html[data-ui="next"] .nextb-menu-toggle::after{
-  content:"";
-  width:5px;
-  height:5px;
-  border-right:1.5px solid currentColor;
-  border-bottom:1.5px solid currentColor;
-  transform:rotate(45deg) translateY(-1px);
-  opacity:.65;
-}
-html[data-ui="next"] .nextb-menu-wrap.is-open > .nextb-menu-toggle{
-  border-color:var(--accent);
-  box-shadow:0 0 0 2px var(--accent-soft);
-}
-html[data-ui="next"] .nextb-menu-panel{
-  position:absolute;
-  top:calc(100% + 6px);
-  left:0;
-  z-index:80;
-  min-width:178px;
-  max-width:min(260px,calc(100vw - 32px));
-  padding:5px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:var(--panel);
-  box-shadow:0 12px 28px rgba(16,24,40,.18);
-}
-html[data-ui="next"] .nextb-menu-panel[hidden]{
-  display:none!important;
-}
-html[data-ui="next"] .nextb-menu-item{
-  appearance:none;
-  display:flex;
-  align-items:center;
-  gap:7px;
-  width:100%;
-  min-height:30px;
-  padding:6px 8px;
-  border:0;
-  border-radius:7px;
-  background:transparent;
-  color:var(--fg);
-  font:inherit;
-  font-size:11.5px;
-  text-align:left;
-  cursor:pointer;
-}
-html[data-ui="next"] .nextb-menu-item:hover{
-  background:var(--panel2);
-}
-html[data-ui="next"] .nextb-menu-item[data-danger="1"]{
-  color:var(--bad);
-}
-html[data-ui="next"] .nextb-menu-item:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-html[data-ui="next"] .nextb-menu-sep{
-  height:1px;
-  margin:4px 3px;
-  background:var(--line);
-}
-html[data-ui="next"] .nextb-mobile-hidden{
-  display:none!important;
-}
-
-/* Selection-driven bulk bar: not in flow until at least one row is selected. */
-html[data-ui="next"] .nextb-bulk-bar{
-  display:none;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:7px;
-  min-height:38px;
-  margin:0 0 9px;
-  padding:6px 8px 6px 12px;
-  border:1px solid color-mix(in srgb,var(--accent) 26%,var(--line));
-  border-radius:10px;
-  background:color-mix(in srgb,var(--accent-soft) 72%,var(--panel));
-  box-shadow:0 1px 3px rgba(16,24,40,.05);
-}
-html[data-ui="next"] .nextb-bulk-bar.is-visible{
-  display:flex;
-}
-html[data-ui="next"] .nextb-bulk-count{
-  display:inline-flex;
-  align-items:baseline;
-  gap:5px;
-  color:var(--fg);
-  font-size:11.5px;
-  font-weight:650;
-  white-space:nowrap;
-}
-html[data-ui="next"] .nextb-bulk-count strong{
-  color:var(--accent);
-  font-size:15px;
-  line-height:1;
-}
-html[data-ui="next"] .nextb-bulk-clear{
-  appearance:none;
-  border:0;
-  background:transparent;
-  color:var(--muted);
-  padding:4px 6px;
-  border-radius:6px;
-  font:inherit;
-  font-size:10.5px;
-  cursor:pointer;
-}
-html[data-ui="next"] .nextb-bulk-clear:hover{
-  background:var(--panel);
-  color:var(--fg);
-}
-html[data-ui="next"] .nextb-bulk-sep{
-  width:1px;
-  align-self:stretch;
-  margin:2px 1px;
-  background:var(--line);
-}
-html[data-ui="next"] .nextb-bulk-actions{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:5px;
-  min-width:0;
-  flex:1 1 auto;
-}
-html[data-ui="next"] #accountToolbar .nextb-original-group{
-  display:none!important;
-}
-
-html[data-ui="next"] .account-scope{
-  margin:0 0 6px;
-  min-height:0;
-  color:var(--muted);
-  font-size:10.5px;
-}
-
-/* Account table: quiet rows, two always-visible actions and a per-row overflow menu. */
-html[data-ui="next"] #accounts .table-wrap{
-  border-radius:10px;
-  border-color:var(--line);
-}
-html[data-ui="next"] #accounts table.account-cards{
-  min-width:1020px;
-}
-html[data-ui="next"] #accounts table.account-cards td{
-  padding-top:8px!important;
-  padding-bottom:8px!important;
-}
-html[data-ui="next"] #accounts td.acct-actions{
-  min-width:126px!important;
-  width:126px!important;
-  white-space:nowrap!important;
-  overflow:visible!important;
-}
-html[data-ui="next"] #accounts .acct-actions-col{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:4px;
-  min-width:0;
-}
-html[data-ui="next"] #accounts .acct-actions-row{
-  display:flex!important;
-  align-items:center;
-  flex-wrap:nowrap!important;
-  gap:4px;
-  min-width:0;
-}
-html[data-ui="next"] #accounts .acct-actions-row .id-btn-label,
-html[data-ui="next"] #accounts .acct-actions-row .id-btn-group{
-  display:none!important;
-}
-html[data-ui="next"] #accounts .acct-actions .nextb-row-extra{
-  display:none!important;
-}
-html[data-ui="next"] #accounts .acct-actions .nextb-row-menu-wrap{
-  position:relative;
-  display:inline-flex;
-}
-html[data-ui="next"] #accounts .nextb-row-more{
-  appearance:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  padding:0;
-  border:1px solid var(--line);
-  border-radius:7px;
-  background:var(--panel);
-  color:var(--muted);
-  font:inherit;
-  font-size:15px;
-  font-weight:700;
-  line-height:1;
-  cursor:pointer;
-}
-html[data-ui="next"] #accounts .nextb-row-more:hover,
-html[data-ui="next"] #accounts .nextb-row-more[aria-expanded="true"]{
-  color:var(--fg);
-  background:var(--panel2);
-  border-color:var(--line-hover);
-}
-html[data-ui="next"] #accounts .nextb-row-panel{
-  position:absolute;
-  top:calc(100% + 5px);
-  right:0;
-  z-index:90;
-  min-width:168px;
-  max-width:min(236px,calc(100vw - 28px));
-  padding:5px;
-  border:1px solid var(--line);
-  border-radius:9px;
-  background:var(--panel);
-  box-shadow:0 12px 28px rgba(16,24,40,.2);
-}
-html[data-ui="next"] #accounts .nextb-row-panel[hidden]{
-  display:none!important;
-}
-html[data-ui="next"] #accounts .nextb-row-panel .nextb-menu-item{
-  min-height:29px;
-  padding:5px 7px;
-  font-size:11px;
-}
-html[data-ui="next"] #accounts .nextb-row-panel .id-btn-group{
-  display:inline-flex!important;
-  gap:3px;
-  margin:2px 4px 2px 7px;
-}
-html[data-ui="next"] #accounts .nextb-row-panel .id-btn{
-  min-width:35px;
-  height:24px;
-  padding:0 6px;
-  font-size:10px;
-}
-html[data-ui="next"] #accounts .nextb-row-panel .id-btn-label{
-  display:block;
-  padding:7px 7px 2px;
-  color:var(--muted);
-  font-size:9.5px;
-}
-
-/* Current-disabled section folds to a one-line status when empty. */
-html[data-ui="next"] #workbuddyDisabledSection{
-  margin-top:12px;
-}
-html[data-ui="next"] #workbuddyDisabledSection > div:first-child{
-  margin-bottom:9px!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection > div:first-child h2{
-  display:flex;
-  align-items:baseline;
-  gap:4px;
-  font-size:13px!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection > div:first-child .legend{
-  max-width:720px;
-  color:var(--muted);
-  font-size:10.5px;
-  line-height:1.45;
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty{
-  padding:10px 13px;
-  background:var(--nextb-soft);
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty > div:first-child{
-  margin:0!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty > div:first-child .legend{
-  display:none!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty > div:first-child h2{
-  margin:0!important;
-  font-size:12px!important;
-  color:var(--muted)!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty > div:first-child h2 em{
-  display:none!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty #disabledList{
-  display:none!important;
-}
-html[data-ui="next"] #workbuddyDisabledSection.next-disabled-empty > div:first-child h2::after{
-  content:"当前没有禁用的账号或模型";
-  color:var(--muted);
-  font-size:11.5px;
-  font-weight:500;
 }
 
 /* External API: orientation band, left rail and one-screen example tabs. */
@@ -7785,81 +7010,9 @@ html[data-ui="next"] .nextb-agent-footer-actions .nextb-agent-foot-note{
   html[data-ui="next"] .nextb-api-guide-copy{
     flex-basis:100%;
   }
-  html[data-ui="next"] #accounts td.acct-actions{
-    min-width:112px!important;
-    width:112px!important;
-  }
-  html[data-ui="next"] #accounts .nextb-row-panel{
-    right:auto;
-    left:0;
-  }
 }
 
 @media (max-width:640px){
-  html[data-ui="next"] #pageAccounts .acct-filterbar{
-    flex-direction:column;
-    align-items:stretch;
-  }
-  html[data-ui="next"] #pageAccounts .acct-filterbar .console-search{
-    flex:0 0 auto!important;
-    width:100%!important;
-    min-width:0;
-    min-height:36px;
-    height:36px;
-  }
-  html[data-ui="next"] #pageAccounts .acct-filterbar select{
-    flex:0 0 auto!important;
-    width:100%;
-    min-height:34px;
-  }
-  html[data-ui="next"] #accountToolbar{
-    gap:5px;
-    padding:6px;
-  }
-  html[data-ui="next"] #accountToolbar > button,
-  html[data-ui="next"] #accountToolbar .tb-group > button{
-    min-height:29px;
-    padding:4px 8px!important;
-    font-size:10.5px!important;
-  }
-  html[data-ui="next"] .nextb-menu-toggle{
-    min-height:29px;
-    padding:4px 8px;
-    font-size:10.5px;
-  }
-  html[data-ui="next"] #accountToolbar > .tb-group.tb-checkin:empty{
-    display:none!important;
-  }
-  html[data-ui="next"] .nextb-bulk-bar{
-    gap:5px;
-    padding:6px 7px;
-  }
-  html[data-ui="next"] .nextb-bulk-actions{
-    flex-basis:100%;
-    order:3;
-  }
-  html[data-ui="next"] .nextb-bulk-sep{
-    display:none;
-  }
-  html[data-ui="next"] #accounts td.acct-actions{
-    min-width:0!important;
-    width:auto!important;
-  }
-  html[data-ui="next"] #accounts .acct-actions-col{
-    justify-content:flex-end;
-  }
-  html[data-ui="next"] #accounts .nextb-row-panel{
-    position:fixed;
-    left:12px;
-    right:12px;
-    top:auto;
-    bottom:14px;
-    max-width:none;
-    max-height:min(62vh,420px);
-    overflow:auto;
-    border-radius:12px;
-    box-shadow:0 18px 48px rgba(16,24,40,.28);
-  }
   html[data-ui="next"] #pageApi .api-page-tabs{
     gap:1px;
   }
@@ -7903,7 +7056,6 @@ html[data-ui="next"] .nextb-agent-footer-actions .nextb-agent-foot-note{
 }
 
 @media (prefers-reduced-motion:reduce){
-  html[data-ui="next"] #pageAccounts *,
   html[data-ui="next"] #pageApi *,
   html[data-ui="next"] #pageAgents *{
     scroll-behavior:auto!important;
@@ -9531,42 +8683,10 @@ html[data-ui="next"] #pageSettings .next-settings-content > section[data-next-hi
 .layout-disclosure-body .console-filterbar{margin:8px 0 0}
 .layout-action-group>button{max-width:100%}
 .layout-form-title{font-size:13px;margin:14px 0 8px;color:var(--fg)}
-.overview-view-label{color:var(--dim);font-size:12px;font-weight:600;margin-bottom:7px}
-html[data-ui="next"] #pageOverview .overview-exit{
-  display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:8px 16px;
-  margin-bottom:14px;padding:9px 13px;min-height:0;
-}
-html[data-ui="next"] .overview-exit>div{margin:0!important}
-html[data-ui="next"] .overview-exit>div:first-child{gap:8px}
-html[data-ui="next"] .overview-exit>div:nth-child(2){margin-inline-start:auto!important}
-html[data-ui="next"] .overview-exit #activeGatewayName{font-size:13px!important}
-html[data-ui="next"] .overview-exit>div:last-child{width:min(210px,100%);min-width:min(160px,100%)}
-html:not([data-ui="next"]) .overview-exit{margin-bottom:16px}
-html[data-ui="next"] .realm-cards-grid{
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr))!important;
-}
-html[data-ui="next"] .realm-cards-grid .realm-card{min-height:0}
-#overviewRequestOptions button{min-height:28px}
 #modelPickActions{margin-inline-start:auto}
 html:not([data-console-layout="on"]):not([data-ui="next"]) .model-catalog-toolbar{display:flex!important}
 .catalog-model-details{display:none}
 #modelsTable .model-map-cell[hidden]{display:none!important}
-.account-scope{margin:0 0 7px;min-height:1.5em}
-.account-group-label{margin-inline-end:3px}
-.acct-group-tools{
-  display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;
-  padding-inline-start:6px;border-inline-start:1px solid var(--line);
-}
-html[data-ui="next"] #accountToolbar .tb-more-toggle{
-  display:inline-flex;align-items:center;justify-content:center;width:auto;gap:6px;
-}
-html[data-ui="next"] #accountToolbar .tb-advanced{
-  display:flex;flex:1 1 100%;min-width:0;align-items:center;flex-wrap:wrap;gap:6px;
-}
-html[data-ui="next"] #accountToolbar .tb-advanced.is-collapsed{display:none}
-html[data-ui="next"] #accountToolbar .tb-advanced .tb-group{flex-wrap:wrap}
-html[data-ui="next"] #accountToolbar .tb-advanced button{white-space:normal}
-html[data-ui="next"] #accountToolbar .tb-bulk{min-width:0}
 html[data-ui="next"] #pageTasks .task-action-group{max-width:100%}
 .daily-target{margin:6px 0 0}
 .task-action-group .acct-picker{max-width:min(340px,100%)}
@@ -9673,11 +8793,6 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     z-index:3;position:sticky;top:0;background:var(--panel2)!important;
   }
 }
-@media (min-width:761px){
-  html[data-ui="next"] #accountToolbar{display:flex;flex-wrap:wrap;gap:6px;overflow:visible}
-  html[data-ui="next"] #accountToolbar button{font-size:11.5px;padding:6px 8px}
-  html[data-ui="next"] #accountToolbar .tb-advanced:not(.is-collapsed){padding:5px 0 0}
-}
 @media (max-width:760px){
   .api-doc-picker{display:grid;gap:4px;margin-bottom:10px;font-size:12px}
   .api-doc-picker select{max-width:100%;width:100%}
@@ -9687,8 +8802,6 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
   .agent-manual-urls>div{grid-template-columns:minmax(0,1fr) auto}
   .agent-manual-urls>div>span{grid-column:1/-1;font-size:12px}
   .log-view-actions>.danger{margin-inline-start:0}
-  html[data-ui="next"] #pageOverview .overview-exit>div:nth-child(2){margin-inline-start:0!important}
-  html[data-ui="next"] #pageOverview .overview-exit>div:last-child{flex:1 1 160px}
   html[data-ui="next"] #pageAnalytics .kpis{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;
   }
@@ -9703,15 +8816,9 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
   #modelsTable .catalog-model-row td.model-id-cell label{min-width:0;white-space:normal;overflow-wrap:anywhere}
   #modelsTable .catalog-model-details{display:inline-flex;flex:0 0 auto;min-height:32px;padding:4px 7px}
   #modelsTable .catalog-model-details::after{content:attr(data-label)}
-  #accountToolbar .acct-group-tools{
-    grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-    padding:6px 0 0;border:0;border-top:1px solid var(--line);
-  }
-  #accountToolbar .account-group-label{grid-column:1/-1}
   #modelsTable .catalog-model-row td{padding:4px 2px!important}
   #modelsTable .catalog-model-row td.model-map-cell{grid-column:1/-1}
   body.win-capped #gatewayModelsSection .next-table-scroll{max-height:none}
-  html[data-ui="next"] #accountToolbar .tb-more-toggle{padding-inline:7px}
   html[data-ui="next"] #pageTasks :is(#sectionDailyTasks,#sectionGrowthTasks) .layout-action-group{justify-content:flex-start}
   html[data-ui="next"] #pageTasks #schedulerBar>div{flex-wrap:wrap;min-width:0}
   html[data-ui="next"] #pageTasks #schedTimes{overflow-wrap:anywhere}
@@ -10001,33 +9108,11 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     <h2 id="gatewayPageTitle" style="margin:0;font-size:17px;color:var(--fg);font-family:var(--serif);font-weight:600;letter-spacing:.02em">网关与账号</h2>
     <div id="gatewayPageDesc" style="font-size:12px;color:var(--dim);margin-top:4px">管理账号池与代理出口，查看当日调用量、估算花费、成功率、最近请求与网关模型清单。</div>
   </div>
-  <!-- 卡片 4: 网关出口控制 -->
-    <div id="cardGatewayCtrl" class="realm-card gateway-ctrl overview-exit next-overview-exit">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <span style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">网关默认出口</span>
-        <span id="activeGatewayKeyCount" class="badge ok mini" style="font-weight:600">0 个 Key 生效</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin:2px 0 8px">
-        <span id="gatewayDot" class="dot" style="width:9px;height:9px"></span>
-        <span id="activeGatewayName" style="font-size:20px;font-weight:700;color:var(--accent);letter-spacing:-.4px">国际版 (Global)</span>
-      </div>
-      <div style="margin-top:auto">
-        <!-- 直接选，不再「⇄ 切到下一个」：三个出口时轮转要点两次才到 CodeArts。
-             选项由 syncRealmPicker() 按 /realm 返回的 options 生成（CodeArts 没
-             配置时只有两项），原生 select 会被上面的自定义下拉接管成主题样式。 -->
-        <select id="realmPicker" style="width:100%" aria-label="网关默认出口"
-                onchange="setActiveGatewayRealm(this.value)">
-          <option value="intl">国际版</option>
-          <option value="cn">国内版</option>
-        </select>
-      </div>
-    </div>
   <!-- 版本中枢控制栏 (三列等高对齐网格) -->
-  <div class="next-overview-control-bar" role="group" aria-label="查看版本与客户端默认出口"><span class="next-overview-control-label">查看版本</span>
-  <div class="realm-cards-grid next-overview-realms">
+  <div class="realm-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:18px">
     
     <!-- 卡片 1: 国际版 (Global) -->
-    <div id="tabIntl" class="realm-card active" onclick="switchViewRealm('intl')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
+    <div id="tabIntl" class="realm-card active" onclick="switchViewRealm('intl')">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">
         <span class="realm-badge-intl">国际版 (Global)</span>
         <span class="mono" style="font-size:11px;color:var(--dim)">www.workbuddy.ai</span>
@@ -10044,7 +9129,7 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     </div>
 
     <!-- 卡片 2: 国内版 (China) -->
-    <div id="tabCn" class="realm-card" onclick="switchViewRealm('cn')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
+    <div id="tabCn" class="realm-card" onclick="switchViewRealm('cn')">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">
         <span class="realm-badge-cn">国内版 (China)</span>
         <span class="mono" style="font-size:11px;color:var(--dim)">copilot.tencent.com</span>
@@ -10061,7 +9146,7 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     </div>
 
     <!-- 卡片 3: CodeArts (华为云) -->
-    <div id="tabCodearts" class="realm-card" onclick="switchViewRealm('codearts')" style="display:none" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
+    <div id="tabCodearts" class="realm-card" onclick="switchViewRealm('codearts')" style="display:none">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">
         <span class="realm-badge-codearts">CodeArts (华为云)</span>
         <span id="tabCodeartsHost" class="mono" style="font-size:11px;color:var(--dim)">华为云</span>
@@ -10077,11 +9162,28 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
         <span id="tabCodeartsKeyBadge" class="badge s mini" style="font-weight:600">0 个 Key</span>
       </div>
     </div>
-  </div>
+
+    <!-- 卡片 4: 网关出口控制 -->
+    <div id="cardGatewayCtrl" class="realm-card gateway-ctrl" style="cursor:default">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">网关默认出口</span>
+        <span id="activeGatewayKeyCount" class="badge ok mini" style="font-weight:600">0 个 Key 生效</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:2px 0 8px">
+        <span id="gatewayDot" class="dot" style="width:9px;height:9px"></span>
+        <span id="activeGatewayName" style="font-size:20px;font-weight:700;color:var(--accent);letter-spacing:-.4px">国际版 (Global)</span>
+      </div>
+      <div style="margin-top:auto">
+        <button class="toggle-realm-btn" id="btnToggleRealm" onclick="toggleActiveGatewayRealm()" style="cursor:pointer;width:100%;padding:7px 12px;font-size:12px">
+          ⇄ 切换默认出口为【国内版】
+        </button>
+      </div>
+    </div>
+
   </div>
   <!-- 顶部统计条：三张统计卡（JS 每轮重画 #cards 内部）+ 调度器状态行，合成
        一块面板（分段的样式见 .gw-summary / #schedulerBar）。 -->
-  <div class="gw-summary next-overview-kpis">
+  <div class="gw-summary">
     <div class="cards" id="cards"></div>
     <div id="schedulerBar">
       <div style="display:flex;align-items:center;gap:8px">
@@ -10100,7 +9202,7 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     <div class="cards" id="codeartsCards"></div>
   </div>
 
-  <div class="console-insights next-overview-insights" id="consoleInsights">
+  <div class="console-insights" id="consoleInsights">
     <div class="console-insight">
       <div class="console-insight-head"><h2>请求 Token 分布</h2><span class="console-insight-note" id="consoleUsageNote">当前页请求</span></div>
       <canvas id="consoleUsageChart" height="168" aria-label="当前页请求的 Token 用量图" role="img"></canvas>
@@ -10121,12 +9223,8 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
   
 
   <section id="recentRequestsSection">
-    <div class="layout-section-head">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
       <h2 style="margin:0">请求列表<em id="recentRealmTag" style="color:var(--dim);font-weight:500"></em><em id="recentCount"></em></h2>
-    </div>
-    <details class="layout-disclosure next-recent-filters" id="overviewRequestOptions" open>
-      <summary>查看全部请求与筛选</summary>
-      <div class="layout-disclosure-body">
       <div style="display:inline-flex;align-items:center;gap:8px">
         <span style="font-size:12px;color:var(--dim)">显示条数:</span>
         <div style="display:inline-flex;gap:3px;background:var(--panel2);padding:3px;border-radius:8px;border:1px solid var(--line)">
@@ -10136,6 +9234,7 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
           <button class="range-btn" id="btnRecentLimit100" onclick="setRecentLimit(100)">100</button>
         </div>
       </div>
+    </div>
     <div class="console-filterbar recent-filterbar" aria-label="请求列表筛选">
       <input id="recentSearchFilter" class="console-search" type="search" placeholder="搜索模型、账号或 API Key" aria-label="搜索请求" oninput="RECENT_FILTERS.query=this.value;renderRecentView()">
       <!-- 结果 / 账号 / 模型 / Key 四个下拉都是服务端过滤（GET /usage/recent 的
@@ -10156,8 +9255,6 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
       <span class="console-filter-count" id="recentFilterCount">当前页全部记录</span>
       <button type="button" class="sec mini" onclick="clearRecentFilters()">清除筛选</button>
     </div>
-      </div>
-    </details>
     <div id="recent" class="table-wrap"></div>
     <div id="recentPagination" style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);flex-wrap:wrap;gap:8px">
       <div id="recentPageInfo">第 1 / 1 页 · 共 0 条记录</div>
@@ -10344,6 +9441,12 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     <button class="sec" id="btnDailyChatWeb" onclick="doDailyChatWeb(this)" style="display:none">网页通道打卡 (国际版)</button>
     </div>
     <div class="tb-group">
+    <!-- 桌面客户端自 2026-09-24 起把 token 改成加密存储（$wbEncrypted 信封）。
+         网关现在会从正在运行的桌面端进程内存里回收静态密钥来解密（只读、密钥
+         只留在内存里，实现见 wb_atrest.py），所以这个入口重新放出来。 -->
+    <button class="sec" id="btnScanDesktop" onclick="scanDesktop(this)">扫描桌面客户端</button>
+    <!-- 活动记录入口：只读 GET /activity/history，账号区自己的控件，不另开页面。 -->
+    <button class="sec" onclick="openActivityHistory()">签到记录</button>
     <button class="sec" onclick="openImport()">导入</button>
     <button class="sec" id="btnExport" onclick="exportAccounts(this)" title="有勾选时只导出勾选的账号，没有勾选时导出当前筛选结果的全部账号">导出</button>
     </div>
@@ -10356,7 +9459,7 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
          （.tb-advanced 用 display:contents 透明化，布局与以前一致）。 -->
     <button class="sec tb-more-toggle" id="btnAcctMore" aria-expanded="false"
             aria-controls="acctAdvancedTools" onclick="toggleAcctAdvanced(this)"
-            title="展开 / 收起批量操作"><span>更多操作</span><span class="tb-more-chev" aria-hidden="true"></span></button>
+            title="展开 / 收起批量操作"><span class="tb-more-chev" aria-hidden="true"></span></button>
     </div>
     <!-- 开启号池隔离后显示号池筛选和移动操作。 -->
     <div class="tb-group tb-pool" id="poolToolsGroup" hidden>
@@ -10369,14 +9472,6 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     <button class="sec" id="batchToText" onclick="batchPoolScope('text', this)" title="把勾选的账号批量移回文本号池（恢复文本模型）" disabled>移入文本池</button>
     </div>
     <div class="tb-advanced is-collapsed" id="acctAdvancedTools">
-    <div class="tb-group acct-secondary">
-    <!-- 桌面客户端自 2026-09-24 起把 token 改成加密存储（$wbEncrypted 信封）。
-         网关现在会从正在运行的桌面端进程内存里回收静态密钥来解密（只读、密钥
-         只留在内存里，实现见 wb_atrest.py），所以这个入口重新放出来。 -->
-    <button class="sec" id="btnScanDesktop" onclick="scanDesktop(this)">扫描桌面客户端</button>
-    <!-- 活动记录入口：只读 GET /activity/history，账号区自己的控件，不另开页面。 -->
-    <button class="sec" onclick="openActivityHistory()">签到记录</button>
-    </div>
     <div class="tb-group tb-bulk">
     <button class="sec" onclick="autoAssignSlots(this)" title="把尚未绑定出口的已启用账号依次分配到已启用的代理槽；已有绑定的账号不受影响。有勾选时只处理勾选的账号">分配代理</button>
     <button class="sec" id="btnProductAll" onclick="cycleAllProducts(this)" title="把目标账号的出站身份切到下一个：WB → VSC → CLI。有勾选时只切勾选的账号，没有勾选时切当前筛选结果的全部账号">切换所有出站身份：<span id="productAllLabel">WB</span></button>
@@ -10388,18 +9483,14 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
     <button class="sec" id="btnBulkDisable" onclick="setAll(false, this)" title="有勾选时只停用勾选的账号，没有勾选时停用当前筛选结果的全部账号">停用</button>
     <button class="sec danger" id="btnBulkDelete" onclick="deleteAccounts(this)" title="有勾选时删除勾选的账号，没有勾选时删除当前筛选结果的全部账号；此操作不可撤销">删除</button>
     </span>
-    <span class="acct-group-tools">
-    <span class="layout-muted account-group-label" id="accountGroupScope" data-no-i18n>分组操作</span>
     <button class="sec" onclick="setCurrentGroup(true, this)">当前分组启用</button>
     <button class="sec" onclick="setCurrentGroup(false, this)">当前分组停用</button>
-    </span>
     <!-- 分组视图只换看法；分组本身仍在每行的「分组」chip 上设置。 -->
     <button class="sec" id="btnAcctGroupView" onclick="toggleAccountGroupView(this)" aria-pressed="false"
              title="按分组把账号列表切成可折叠的小节；想改分组，点每行账号上的「分组」">按分组查看</button>
     </div>
     </div>
   </div>
-    <p class="layout-muted account-scope" id="accountActionScope" aria-live="polite" data-no-i18n></p>
     <div id="accounts"></div>
       </div>
     </div>
@@ -12222,6 +11313,19 @@ body.win-capped #pageAnalytics section.panel .usage-dimension-scroll{
         </div>
       </section>
 
+      <section id="dataBackupSection" data-cat="system" data-settings-group="system">
+        <h2>数据备份与恢复</h2>
+        <p class="layout-muted">备份包含账号、设置、用量历史和订阅桥数据。请妥善保管含凭证的 ZIP。</p>
+        <div class="toolbar" style="margin:10px 0">
+          <button type="button" id="dataBackupExport" onclick="exportDataBackup(this)">下载全量备份</button>
+          <button type="button" class="sec" id="dataBackupImport" onclick="document.getElementById('dataBackupFile').click()">导入备份</button>
+          <input type="file" id="dataBackupFile" accept=".zip,application/zip" hidden onchange="importDataBackup(this)">
+          <button type="button" class="sec" id="dataBackupConfirm" hidden onclick="chooseDataBackup(true)">安排恢复</button>
+          <button type="button" class="sec" id="dataBackupCancel" hidden onclick="chooseDataBackup(false)">取消恢复</button>
+        </div>
+        <div id="dataBackupStatus" class="layout-muted" role="status" aria-live="polite"></div>
+      </section>
+
       <section data-cat="system" data-settings-group="system">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
           <div>
@@ -13181,7 +12285,18 @@ function updateUI(){
     : (isCnGw ? "https://copilot.tencent.com/v2"
               : ((window.CODEARTS_OVERVIEW || {}).base_url || "华为云 CodeArts"));
 
-  syncRealmPicker();
+  const gwOptions = (window.REALM_OPTIONS && window.REALM_OPTIONS.length)
+    ? window.REALM_OPTIONS : ["intl", "cn"];
+  let gwIdx = gwOptions.indexOf(gwRealm);
+  if(gwIdx < 0) gwIdx = 0;
+  const nextGw = gwOptions[(gwIdx + 1) % gwOptions.length];
+  const nextGwName = (nextGw === "intl") ? "国际版" : (nextGw === "cn" ? "国内版" : "CodeArts");
+  const btnToggle = document.getElementById("btnToggleRealm");
+  if(btnToggle) {
+    btnToggle.textContent = "切换默认出口为【" + nextGwName + "】";
+    btnToggle.style.borderColor = isIntlGw ? "var(--accent)" : (isCnGw ? "var(--bad)" : "#5b3fa0");
+    btnToggle.style.color = isIntlGw ? "var(--accent)" : (isCnGw ? "var(--bad)" : "#5b3fa0");
+  }
   const cardGw = document.getElementById("cardGatewayCtrl");
   if(cardGw){
     cardGw.style.borderColor = isIntlGw ? "rgba(37,99,235,.28)"
@@ -13333,19 +12448,15 @@ function realmLabel(r){
   return r === "intl" ? "国际版" : (r === "cn" ? "国内版" : "CodeArts");
 }
 
-/* 默认出口下拉（卡片 4）：选中哪个就切到哪个，不再按 (idx+1) 轮转——三个出口
-   时「国际版 → CodeArts」要点两次，而且点到哪一个是顺手点出来的，不是选出来的。
-   同值或不在选项里的取值一律不提交，只把下拉拨回当前出口。 */
-async function setActiveGatewayRealm(realm){
+async function toggleActiveGatewayRealm(){
   const options = window.REALM_OPTIONS || ["intl", "cn"];
   const cur = window.ACTIVE_GATEWAY_REALM || "intl";
-  if(!realm || realm === cur || options.indexOf(realm) < 0){
-    syncRealmPicker();
-    return;
-  }
+  let idx = options.indexOf(cur);
+  if(idx < 0) idx = 0;
+  const next = options[(idx + 1) % options.length];
   try {
-    const res = await postJSON("/realm", {realm: realm});
-    window.ACTIVE_GATEWAY_REALM = res.current || realm;
+    const res = await postJSON("/realm", {realm: next});
+    window.ACTIVE_GATEWAY_REALM = res.current || next;
     toast("网关默认上游已切换并永久保存为: " + realmLabel(window.ACTIVE_GATEWAY_REALM));
     setViewRealm(window.ACTIVE_GATEWAY_REALM);
     window.updateUI();
@@ -13358,31 +12469,7 @@ async function setActiveGatewayRealm(realm){
     }
   }catch(e){
     alert("切换失败: " + e.message);
-    syncRealmPicker();
   }
-};
-
-/* 下拉的选项与选中项。选项集只在 CodeArts 启用/停用后变化，所以按 data-options
-   比对，变了才重建 innerHTML——每轮 updateUI 都重写会把自定义下拉的面板一起
-   重建，还会让 i18n 多走一遍整棵树。 */
-function syncRealmPicker(){
-  const sel = document.getElementById("realmPicker");
-  if(!sel) return;
-  const options = (window.REALM_OPTIONS && window.REALM_OPTIONS.length)
-    ? window.REALM_OPTIONS : ["intl", "cn"];
-  const want = options.join(",");
-  if(sel.getAttribute("data-options") !== want){
-    sel.setAttribute("data-options", want);
-    sel.innerHTML = options.map(function(r){
-      return '<option value="' + r + '">' + realmLabel(r) + "</option>";
-    }).join("");
-    /* 新长出来的 <option> 是中文原文：非简体界面要再走一次 i18n，否则切过语言
-       之后重建的这一项（通常是 CodeArts）会停在中文。 */
-    if(window.WB_I18N && window.WB_I18N.current && window.WB_I18N.current() !== "zh"){
-      window.WB_I18N.apply();
-    }
-  }
-  sel.value = window.ACTIVE_GATEWAY_REALM || "intl";
 };
 
 /* ---- CodeArts 第三出口 ---- */
@@ -17582,7 +16669,6 @@ function renderAccounts(){
   list = list.filter(accountMatchesFilters);
   const filterCount = document.getElementById('accountFilterCount');
   if(filterCount) filterCount.textContent = '显示 ' + list.length + ' / ' + unfilteredCount + ' 个账号';
-  updateAccountActionScope();
   // 排序：停用的永远沉底（备注/权重再高也一样）→ 备注是启用组内的加分项
   // （有备注的账号只在同权重时排前面，不再全局置顶）→ 权重高的在前 →
   // 同权重保持服务端顺序稳定，表格不乱跳。
@@ -17632,9 +16718,9 @@ function renderAccounts(){
     + '<th style="text-align:left">账号</th>'
     + '<th style="text-align:center;width:52px">状态</th>'
     + '<th style="text-align:center;width:96px" title="今日活动">活动</th>'
-    + '<th style="text-align:center;width:120px">出口</th>'
+    + '<th style="text-align:center">出口</th>'
     + '<th style="text-align:center;width:58px">权重</th>'
-    + '<th style="text-align:left;width:112px">积分</th>'
+    + '<th style="text-align:left">积分</th>'
     + '<th style="text-align:right;width:38px">请求</th>'
     + '<th style="text-align:right;width:50px" title="总 token">Token</th>'
     + '<th style="text-align:right;width:48px">缓存</th>'
@@ -17799,33 +16885,8 @@ function acctScopeUids(){
     selected: false,
   };
 }
-function updateAccountActionScope(){
-  const el = document.getElementById('accountActionScope');
-  if(!el) return;
-  const scope = acctScopeUids();
-  const count = scope.uids.length;
-  const format = scope.selected ? '已选 {count} 个账号' : '批量操作作用于当前筛选的 {count} 个账号';
-  const i18n = window.WB_I18N;
-  const lang = i18n && i18n.current();
-  const translate = function(text){
-    if(lang === 'en') return i18n.translate(text);
-    if(lang === 'zh-Hant') return i18n.translateHant(text);
-    return text;
-  };
-  const value = translate(format).replace('{count}', String(count));
-  if(el.textContent !== value) el.textContent = value;
-  const groupLabel = document.getElementById('accountGroupScope');
-  if(groupLabel){
-    const group = ACCOUNT_FILTERS.group;
-    const label = group ? translate('分组操作：{group}').replace('{group}', group)
-      : translate('分组操作');
-    if(groupLabel.textContent !== label) groupLabel.textContent = label;
-  }
-}
-
 function updateBatchPoolBar(){
   const n = acctSelUids().length;
-  updateAccountActionScope();
   ['batchToMedia','batchToText'].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.disabled = !n;
@@ -19956,15 +19017,6 @@ function renderRecentView(){
   if(!RECENT_RENDER) return;
   const q = RECENT_FILTERS.query.trim().toLowerCase();
   const serverCount = recentServerFilters().length;
-  const options = document.getElementById('overviewRequestOptions');
-  if(options && options.dataset){
-    if((q || serverCount) && !options.dataset.filtersActive){
-      options.open = true;
-      options.dataset.filtersActive = '1';
-    }else if(!q && !serverCount){
-      delete options.dataset.filtersActive;
-    }
-  }
   const rows = RECENT_RENDER.rows.filter(r => {
     if(!q) return true;
     return [r.model, RECENT_RENDER.acctName(r.account), r.account, r.key_name, r.key]
@@ -21473,8 +20525,6 @@ function applyConsoleView(view){
   }[CONSOLE_VIEW];
   if(title) title.textContent = COPY[0];
   if(desc) desc.textContent = COPY[1];
-  const requestOptions = document.getElementById('overviewRequestOptions');
-  if(CONSOLE_VIEW === 'requests' && requestOptions) requestOptions.open = true;
   if(CONSOLE_VIEW === 'models') setConsoleNavActive('btnNavModels', '模型管理');
   else if(CONSOLE_VIEW === 'requests') setConsoleNavActive('btnNavRequests', '请求记录');
   else setConsoleNavActive(null, '运行概览');
@@ -22048,6 +21098,8 @@ async function loadSettings(showToast, opts){
       accounts: Array.isArray(k.accounts) ? k.accounts.slice() : [],
       concurrency_limit: parseInt(k.concurrency_limit || 0, 10) || 0,
       daily_token_limit: parseInt(k.daily_token_limit || 0, 10) || 0,
+      credit_limit: parseFloat(k.credit_limit || 0) || 0,
+      credit_used: parseFloat(k.credit_used || 0) || 0,
       enabled: k.enabled !== false,
       created_at: k.created_at || '',
       _editing: false,
@@ -22081,6 +21133,7 @@ async function loadSettings(showToast, opts){
       keepSelect.value = String((typeof data.keep_backups === 'number') ? data.keep_backups : 1);
     }
     loadUpdateBackups();
+    loadDataBackup();
     const updateProxy = document.getElementById('setUpdateProxySlot');
     if(updateProxy){
       const choices = Array.isArray(data.update_check_proxy_slots)
@@ -23757,6 +22810,119 @@ function applyUpdateStatus(data){
   }
 }
 
+const DATA_BACKUP_URL = '/settings/data-backup';
+let pendingDataBackup = null;
+let dataBackupBusy = false;
+
+function showDataBackup(data, message){
+  if(data) pendingDataBackup = data;
+  const phase = (pendingDataBackup || {}).phase;
+  const label = {
+    ready: '备份已校验，可安排恢复。',
+    pending: '已安排恢复，重启网关后生效。',
+    restored: '恢复完成。恢复前的数据已保留。',
+    failed: '恢复失败，原数据已保留。',
+    cancelled: '已取消恢复。',
+  }[phase] || '';
+  document.getElementById('dataBackupImport').disabled = dataBackupBusy || phase === 'pending';
+  document.getElementById('dataBackupConfirm').hidden = phase !== 'ready';
+  document.getElementById('dataBackupCancel').hidden = phase !== 'ready' && phase !== 'pending';
+  document.getElementById('dataBackupConfirm').disabled = dataBackupBusy;
+  document.getElementById('dataBackupCancel').disabled = dataBackupBusy;
+  document.getElementById('dataBackupStatus').textContent = message ?? label;
+}
+
+async function loadDataBackup(){
+  if(dataBackupBusy || !document.getElementById('dataBackupStatus')) return;
+  try{
+    const result = await getJSON(DATA_BACKUP_URL);
+    if(!dataBackupBusy) showDataBackup(result);
+  }catch(e){
+    if(!dataBackupBusy) showDataBackup(null, '备份状态暂不可用。');
+  }
+}
+
+async function dataBackupFetch(url, options){
+  const res = await fetch(url, {...options, cache:'no-store', headers: authHeaders(options && options.headers)});
+  if(res.status === 401 || res.status === 403){
+    panelSessionLost();
+    throw new Error('unauthorized');
+  }
+  if(!res.ok){
+    const data = await res.json().catch(() => ({}));
+    throw new Error((data.error && data.error.message) || 'HTTP ' + res.status);
+  }
+  return res;
+}
+
+async function exportDataBackup(btn){
+  btn.disabled = true;
+  const stamp = new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+  const name = 'workbuddy-data-' + stamp + '.zip';
+  try{
+    let file = null;
+    // File System Access streams large backups directly to disk when available.
+    if(typeof window.showSaveFilePicker === 'function'){
+      try { file = await window.showSaveFilePicker({suggestedName: name}); }
+      catch(e){ if(e.name === 'AbortError') return; }
+    }
+    showDataBackup(null, '正在导出备份…');
+    const res = await dataBackupFetch(DATA_BACKUP_URL + '/export');
+    if(file && res.body){
+      await res.body.pipeTo(await file.createWritable());
+    }else{
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    showDataBackup();
+  }catch(e){
+    showDataBackup(null, e.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function importDataBackup(input){
+  const file = input.files && input.files[0];
+  input.value = '';
+  if(!file || dataBackupBusy) return;
+  dataBackupBusy = true;
+  showDataBackup(null, '正在上传并校验备份…');
+  try{
+    pendingDataBackup = await (await dataBackupFetch(DATA_BACKUP_URL + '/import', {
+      method:'POST', headers:{'Content-Type':'application/zip'}, body:file,
+    })).json();
+    showDataBackup();
+  }catch(e){
+    showDataBackup(null, e.message);
+  }finally{
+    dataBackupBusy = false;
+    const status = document.getElementById('dataBackupStatus').textContent;
+    showDataBackup(null, status);
+  }
+}
+
+async function chooseDataBackup(confirmRestore){
+  if(dataBackupBusy || !pendingDataBackup || !pendingDataBackup.id) return;
+  if(confirmRestore && !window.confirm('重启时将用备份替换当前数据。恢复后可能需要使用备份中的面板密码。确定安排恢复？')) return;
+  dataBackupBusy = true;
+  showDataBackup();
+  try{
+    pendingDataBackup = await postJSON(DATA_BACKUP_URL + (confirmRestore ? '/confirm' : '/cancel'),
+      {id:pendingDataBackup.id});
+    showDataBackup();
+  }catch(e){
+    showDataBackup(null, e.message);
+  }finally{
+    dataBackupBusy = false;
+    const status = document.getElementById('dataBackupStatus').textContent;
+    showDataBackup(null, status);
+  }
+}
+
 async function loadUpdateStatus(){
   try {
     applyUpdateStatus(await getJSON('/updates'));
@@ -24276,6 +23442,18 @@ function renderKeyRows(){
         +     '<input type="number" min="0" step="1" id="editKeyDaily_' + i + '" value="' + (row.daily_token_limit || '') + '" placeholder="0 代表不限制" '
         +       'style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;color:var(--fg)">'
         +   '</div>'
+        +   '<div>'
+        +     '<div style="font-size:12px;color:var(--dim);margin-bottom:4px;font-weight:500">积分总额度 <span style="color:var(--dim-light)">(0 = 不限)</span></div>'
+        +     '<input type="number" min="0" step="0.01" id="editKeyCredit_' + i + '" value="' + (row.credit_limit || '') + '" placeholder="如 1000，用完这个 Key 就停用" '
+        +       'style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;color:var(--fg)">'
+        +     '<label style="display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:11.5px;color:var(--dim);cursor:pointer;line-height:1.5">'
+        +       '<input type="checkbox" id="editKeyCreditRemain_' + i + '" style="margin-top:2px"' + (row._creditRemain ? ' checked' : '') + '>'
+        +       '<span>按「剩余额度」填：勾上后上面的数字是还能用多少，保存时自动换算成总量。</span>'
+        +       '<span style="display:block;color:var(--dim-light)">已用 '
+        +         (row.credit_used || 0).toFixed(2) + ' · 当前剩余 '
+        +         (((row.credit_limit || 0) > 0) ? Math.max(0, (row.credit_limit || 0) - (row.credit_used || 0)).toFixed(2) : '不限') + '</span>'
+        +     '</label>'
+        +   '</div>'
         +   '<div style="grid-column:1 / -1">'
         +     '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">'
         +       '<div style="font-size:12px;color:var(--dim);font-weight:500">模型准入 <span id="editKeyModelsSummary_' + i + '" style="color:var(--dim-light)"></span></div>'
@@ -24340,6 +23518,10 @@ function renderKeyRows(){
     const dailyBadge = (row.daily_token_limit && row.daily_token_limit > 0)
       ? '<span class="badge s mini" style="font-size:11px">日限 ' + row.daily_token_limit + 'M</span>'
       : '';
+    const creditLeft = (row.credit_limit && row.credit_limit > 0) ? Math.max(0, row.credit_limit - (row.credit_used || 0)) : 0;
+    const creditBadge = (row.credit_limit && row.credit_limit > 0)
+      ? '<span class="badge s mini" style="font-size:11px' + (creditLeft <= 0 ? ';color:var(--bad)' : '') + '">积分 ' + (row.credit_used || 0).toFixed(2) + ' / ' + row.credit_limit + (creditLeft > 0 ? ' · 剩 ' + creditLeft.toFixed(2) : ' · 已用完') + '</span>'
+      : '';
     const modelBadge = (Array.isArray(row.models) && row.models.length)
       ? '<span class="badge s" style="font-size:11px">限 ' + esc(modelPatternsText(row.models)) + '</span>'
       : '';
@@ -24361,6 +23543,7 @@ function renderKeyRows(){
         +       accountBadge
         +       concBadge
         +       dailyBadge
+        +       creditBadge
       +     '</div>'
       +     '<div style="font-size:12px;color:var(--dim);display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
       +       '<span>Key: <span class="mono" style="color:var(--fg);font-weight:500">' + esc(displayKey) + '</span></span>'
@@ -24701,6 +23884,21 @@ async function saveSingleKey(index, btn){
     row.concurrency_limit = Math.max(0, parseInt((concInput ? concInput.value : row.concurrency_limit) || 0, 10) || 0);
   const dailyInput = document.getElementById('editKeyDaily_' + index);
   row.daily_token_limit = Math.max(0, parseInt((dailyInput ? dailyInput.value : row.daily_token_limit) || 0, 10) || 0);
+  const creditInput = document.getElementById('editKeyCredit_' + index);
+  const creditRemain = document.getElementById('editKeyCreditRemain_' + index);
+  const creditRaw = Math.max(0, parseFloat((creditInput ? creditInput.value : row.credit_limit) || 0) || 0);
+  if (creditRemain && creditRemain.checked) {
+    // 「剩余额度」模式：输入的是还能用多少，落库时换算成总量（已用 + 剩余）。
+    // 剩余填 0 = 立刻停用，直接禁用这一行，避免 0 被当成「不限」。
+    row.credit_limit = Math.round(((row.credit_used || 0) + creditRaw) * 100) / 100;
+    if (creditRaw <= 0) {
+      row.enabled = false;
+      toast('剩余额度设为 0：已禁用 Key [' + (row.name || '未命名') + ']', 'warn');
+    }
+  } else {
+    row.credit_limit = creditRaw;
+  }
+  row._creditRemain = !!(creditRemain && creditRemain.checked);
   if(keyVal) row.key = keyVal;
   row._editing = false;
 
@@ -24761,6 +23959,8 @@ function addApiKeyRow(){
     models: [],
       concurrency_limit: 0,
     daily_token_limit: 0,
+    credit_limit: 0,
+    credit_used: 0,
     enabled: true,
     masked: '',
     _editing: true
@@ -24869,6 +24069,7 @@ async function saveApiKeys(btn){
       accounts: row.accounts || [],
         concurrency_limit: parseInt(row.concurrency_limit || 0, 10) || 0,
         daily_token_limit: parseInt(row.daily_token_limit || 0, 10) || 0,
+        credit_limit: parseFloat(row.credit_limit || 0) || 0,
       enabled: row.enabled !== false,
       // Blank means "keep the stored key", which the server honours per row.
       key: (row.key || '').trim(),
@@ -28201,13 +27402,29 @@ function buildHeatGrid(heat){
 }
 
 /* ---------------- 用量明细（维度切换） ---------------- */
+const creditRatioTip = '按当前区间内同时记录 Token 和实际扣分的成功对话估算。缓存命中和输入输出比例都会影响结果。';
+function renderCreditRatio(sample){
+  if(!sample) return '';
+  const {credit_sample_tokens: tokens, credit_sample_credits: credits, credit_sample_requests: requests} = sample;
+  if(!(tokens > 0 && credits > 0 && requests > 0)){
+    return '<span title="暂无扣分样本">—</span>';
+  }
+  const perMillion = credits / tokens * 1e6;
+  const perCredit = tokens / credits;
+  if(!Number.isFinite(perMillion) || !Number.isFinite(perCredit)) return '—';
+  return `<div title="${creditRatioTip}" style="white-space:nowrap">
+    <b>≈ ${perMillion.toLocaleString('zh-CN', {maximumSignificantDigits: 4})}</b> <span>积分 / 百万 Token</span><br>
+    <small>≈ ${fullNum(perCredit, 1)} <span>Token / 积分</span> · ${fullNum(requests)} <span>扣分样本</span></small>
+  </div>`;
+}
 const dimDefs = {
   model: {
-    head: ['模型', '请求', 'Token', '平均速度', '缓存命中', '消耗积分', '花费'],
+    head: ['模型', '请求', 'Token', '平均速度', '缓存命中', '消耗积分', '积分换算', '花费'],
     columns: [
       {id:'who', label:'模型'}, {id:'req', label:'请求', align:'num'},
       {id:'tok', label:'Token'}, {id:'speed', label:'平均速度', align:'num'},
       {id:'cache', label:'缓存命中', align:'num'}, {id:'credit', label:'消耗积分', align:'num'},
+      {id:'creditRatio', label:'积分换算', align:'num'},
       {id:'cost', label:'花费', align:'num'},
     ],
     rows(){
@@ -28222,6 +27439,7 @@ const dimDefs = {
         speed: m.window.speed_avg,
         cache: m.window.cache_hit_pct,
         credit: m.window.credit != null ? Number(m.window.credit).toFixed(2) : '—',
+        creditSample: m.window,
         cost: m.window.cost_cny,
       }));
     }
@@ -28351,6 +27569,7 @@ function renderDim(){
       speed: r.speed != null ? Number(r.speed).toFixed(0) + ' tok/s' : '—',
       cache: fmtPct(r.cache),
       credit: (r.credit != null && r.credit !== '—') ? (Number(r.credit) > 0 ? '<b style="color:var(--warn)">'+r.credit+'</b>' : r.credit) : '—',
+      creditRatio: renderCreditRatio(r.creditSample),
       remain: remainTxt,
       cost: r.cost != null ? fmtCostCny(r.cost) : '—',
     };
@@ -30064,14 +29283,6 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
     });
   }
 
-  function expandRecentFilters(){
-    var details = document.getElementById('overviewRequestOptions');
-    if(details && details.tagName === 'DETAILS'){
-      if(details.tagName === 'DETAILS'){ try { details.open = true; } catch(e){} }
-      details.setAttribute('data-nexta-open', '1');
-    }
-  }
-
   function normalizeSourceBadge(){
     var el = document.getElementById('modelsSourceLine');
     if(!el) return;
@@ -30086,7 +29297,6 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
     syncPicker();
     hideRedundantHeaders();
     hideTinyPageNavs();
-    expandRecentFilters();
     normalizeSourceBadge();
   }
 
@@ -30247,14 +29457,11 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
 
   var doc = document;
   var TOAST = null;
-  var lastTab = '';
   var observer = null;
   var pending = false;
-  var rowSeq = 0;
 
   function byId(id){ return doc.getElementById(id); }
   function all(selector, root){ return Array.prototype.slice.call((root || doc).querySelectorAll(selector)); }
-  function txt(el){ return el ? String(el.textContent || '').trim() : ''; }
   function on(el, name, fn){
     if(!el || !el.addEventListener) return;
     var key = '__nextb_' + name;
@@ -30374,275 +29581,6 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
   function settingsButton(label, cls){
     return button(label || '前往密钥设置', cls || 'sec mini', openSettings);
   }
-  function currentTab(){
-    if(typeof window.nextCurrentTab === 'function'){
-      try { return window.nextCurrentTab() || ''; } catch(e){}
-    }
-    var page = doc.querySelector('.main-page.active');
-    var map = {
-      pageOverview: 'overview', pageGateway: 'gateway', pageAccounts: 'accounts',
-      pageApi: 'api', pageAnalytics: 'analytics', pageTasks: 'tasks',
-      pageAgents: 'agents', pageMedia: 'media', pageSettings: 'settings', pageLogs: 'logs'
-    };
-    return page && map[page.id] || '';
-  }
-
-  function closeMenus(except){
-    all('.nextb-menu-wrap.is-open, .nextb-row-menu-wrap.is-open').forEach(function(wrap){
-      if(wrap === except) return;
-      wrap.classList.remove('is-open');
-      var panel = wrap.querySelector('.nextb-menu-panel, .nextb-row-panel');
-      var toggle = wrap.querySelector('[aria-expanded="true"]');
-      if(panel) panel.hidden = true;
-      if(toggle) toggle.setAttribute('aria-expanded', 'false');
-    });
-  }
-  function openMenu(wrap, panel, toggle){
-    closeMenus(wrap);
-    wrap.classList.add('is-open');
-    panel.hidden = false;
-    toggle.setAttribute('aria-expanded', 'true');
-  }
-  function closeMenu(wrap){
-    if(!wrap) return;
-    wrap.classList.remove('is-open');
-    var panel = wrap.querySelector('.nextb-menu-panel, .nextb-row-panel');
-    var toggle = wrap.querySelector('[aria-expanded="true"]');
-    if(panel) panel.hidden = true;
-    if(toggle) toggle.setAttribute('aria-expanded', 'false');
-  }
-  function menuWrap(toggleLabel, title){
-    var wrap = make('div', 'nextb-menu-wrap');
-    var toggle = button(toggleLabel, 'nextb-menu-toggle', null, title);
-    toggle.setAttribute('aria-haspopup', 'menu');
-    toggle.setAttribute('aria-expanded', 'false');
-    var panel = make('div', 'nextb-menu-panel');
-    panel.hidden = true;
-    panel.setAttribute('role', 'menu');
-    wrap.appendChild(toggle);
-    wrap.appendChild(panel);
-    toggle.addEventListener('click', function(event){
-      event.stopPropagation();
-      if(wrap.classList.contains('is-open')) closeMenu(wrap);
-      else openMenu(wrap, panel, toggle);
-    });
-    panel.addEventListener('click', function(event){ event.stopPropagation(); });
-    return {wrap: wrap, toggle: toggle, panel: panel};
-  }
-  function proxyItem(source, label, opts){
-    opts = opts || {};
-    var item = button(label, 'nextb-menu-item', function(){
-      closeMenus();
-      if(source && source.disabled) return;
-      if(source && typeof source.click === 'function') source.click();
-      else if(source && typeof source.onclick === 'function') source.onclick.call(source, {target: source});
-    }, opts.title || '');
-    item.setAttribute('role', 'menuitem');
-    if(opts.danger) item.setAttribute('data-danger', '1');
-    if(source && source.disabled) item.disabled = true;
-    return item;
-  }
-  function moveInto(wrap, nodes){
-    nodes.forEach(function(node){
-      if(!node || node.parentNode === wrap) return;
-      wrap.appendChild(node);
-    });
-  }
-
-  /* Account toolbar ------------------------------------------------------ */
-  function ensureAccountMenus(){
-    var toolbar = byId('accountToolbar');
-    if(!toolbar || toolbar.getAttribute('data-nextb-toolbar') === '1') return;
-    var add = toolbar.querySelector(':scope > button[onclick="openLoginModal()"]')
-      || toolbar.querySelector('button[onclick="openLoginModal()"]');
-    var apiKey = toolbar.querySelector('button[onclick="openApiKeyModal()"]');
-    var importBtn = toolbar.querySelector('button[onclick="openImport()"]');
-    var exportBtn = byId('btnExport');
-    var credits = toolbar.querySelector('button[onclick="fetchCredits(this)"]');
-    var credentials = toolbar.querySelector('button[onclick="refreshAccounts(this)"]');
-    var test = toolbar.querySelector('button[onclick="testAccounts(this)"]');
-    if(!add || !apiKey || !importBtn || !exportBtn || !credits || !credentials || !test) return;
-    toolbar.setAttribute('data-nextb-toolbar', '1');
-    add.classList.add('primary');
-
-    var importMenu = menuWrap('导入 / 导出', '导入或导出账号');
-    importMenu.panel.appendChild(proxyItem(importBtn, '导入账号'));
-    importMenu.panel.appendChild(proxyItem(exportBtn, '导出账号'));
-    toolbar.insertBefore(importMenu.wrap, importBtn.parentNode);
-
-    var refreshMenu = menuWrap('刷新 / 测试', '刷新积分、凭证或测试账号');
-    refreshMenu.panel.appendChild(proxyItem(credits, '刷新积分'));
-    refreshMenu.panel.appendChild(proxyItem(credentials, '刷新凭证'));
-    refreshMenu.panel.appendChild(proxyItem(test, '测试账号'));
-    var quick = credits.closest('.tb-quick') || test.parentNode;
-    toolbar.insertBefore(refreshMenu.wrap, quick);
-    quick.classList.add('nextb-original-group');
-    quick.setAttribute('aria-hidden', 'true');
-    var importGroup = importBtn.closest('.tb-group');
-    if(importGroup && importGroup !== quick){
-      importGroup.classList.add('nextb-original-group');
-      importGroup.setAttribute('aria-hidden', 'true');
-    }
-  }
-
-  function bulkBarHtml(){
-    var bar = make('div', 'nextb-bulk-bar');
-    bar.id = 'nextbAccountBulkBar';
-    bar.setAttribute('role', 'region');
-    bar.setAttribute('aria-label', '已选账号批量操作');
-    var count = make('span', 'nextb-bulk-count');
-    count.appendChild(make('span', null, '已选'));
-    var strong = make('strong', null, '0');
-    count.appendChild(strong);
-    count.appendChild(make('span', null, '个账号'));
-    bar.appendChild(count);
-    bar.appendChild(button('取消选择', 'nextb-bulk-clear', function(){
-      if(typeof window.clearAccountSelection === 'function') window.clearAccountSelection();
-      if(typeof window.renderAccounts === 'function') window.renderAccounts();
-    }));
-    bar.appendChild(make('span', 'nextb-bulk-sep'));
-    bar.appendChild(make('div', 'nextb-bulk-actions'));
-    return bar;
-  }
-  function ensureBulkBar(){
-    var existing = byId('nextbAccountBulkBar');
-    if(existing) return existing;
-    var toolbar = byId('accountToolbar');
-    var scope = byId('accountActionScope');
-    var host = scope && scope.parentNode || toolbar && toolbar.parentNode;
-    if(!host) return null;
-    var bar = bulkBarHtml();
-    if(scope && scope.parentNode === host) host.insertBefore(bar, scope);
-    else host.insertBefore(bar, toolbar ? toolbar.nextSibling : null);
-    return bar;
-  }
-  function syncBulkBar(){
-    var bar = ensureBulkBar();
-    if(!bar) return;
-    var selected = [];
-    try {
-      selected = typeof window.selectedAccountsForBulk === 'function'
-        ? window.selectedAccountsForBulk() : [];
-    } catch(e){}
-    var n = selected.length;
-    bar.classList.toggle('is-visible', n > 0);
-    var strong = bar.querySelector('.nextb-bulk-count strong');
-    if(strong) strong.textContent = String(n);
-    var actions = bar.querySelector('.nextb-bulk-actions');
-    if(!actions) return;
-    var ids = ['btnBulkEnable', 'btnBulkDisable', 'btnBulkDelete', 'batchToMedia', 'batchToText'];
-    ids.forEach(function(id){
-      var source = byId(id);
-      if(!source) return;
-      var key = 'nextbBulk' + id;
-      if(actions[key] && actions[key].parentNode === actions) return;
-      var item = proxyItem(source, txt(source), {
-        danger: id === 'btnBulkDelete' || id === 'btnBulkDelete',
-        title: source.title || ''
-      });
-      item.setAttribute('data-nextb-source', id);
-      item.disabled = !!source.disabled;
-      if(id === 'btnBulkDelete') item.setAttribute('data-danger', '1');
-      actions.appendChild(item);
-      actions[key] = item;
-    });
-    all('[data-nextb-source]', actions).forEach(function(item){
-      var source = byId(item.getAttribute('data-nextb-source'));
-      if(!source) return;
-      item.disabled = !!source.disabled;
-      item.textContent = txt(source) || item.textContent;
-    });
-  }
-  function hookBulkBar(){
-    if(!window.updateBatchPoolBar || window.updateBatchPoolBar.__nextbWrapped) return;
-    var original = window.updateBatchPoolBar;
-    var wrapped = function(){
-      var result = original.apply(this, arguments);
-      try { syncBulkBar(); } catch(e){}
-      return result;
-    };
-    wrapped.__nextbWrapped = true;
-    wrapped.__nextbOriginal = original;
-    window.updateBatchPoolBar = wrapped;
-  }
-
-  function addRowMenu(actions){
-    if(!actions || actions.getAttribute('data-nextb-row') === '1') return;
-    var rows = all(':scope > .acct-actions-row', actions);
-    if(!rows.length) return;
-    var row = rows[0];
-    var buttons = all('button', row);
-    if(!buttons.length) return;
-    actions.setAttribute('data-nextb-row', '1');
-    var keep = buttons.slice(0, 2);
-    var extras = buttons.slice(2);
-    var wrap = make('span', 'nextb-row-menu-wrap');
-    var more = button('···', 'nextb-row-more', null, '更多账号操作');
-    more.setAttribute('aria-haspopup', 'menu');
-    more.setAttribute('aria-expanded', 'false');
-    var panel = make('div', 'nextb-row-panel');
-    panel.hidden = true;
-    panel.setAttribute('role', 'menu');
-    wrap.appendChild(more);
-    wrap.appendChild(panel);
-    extras.forEach(function(source){
-      source.classList.add('nextb-row-extra');
-      panel.appendChild(proxyItem(source, txt(source), {
-        danger: /danger|bad/.test(source.className),
-        title: source.title || ''
-      }));
-    });
-    var second = rows[1];
-    if(second){
-      var identityLabel = second.querySelector('.id-btn-label');
-      if(identityLabel){
-        var label = make('div', 'id-btn-label', txt(identityLabel));
-        panel.appendChild(label);
-      }
-      var identity = second.querySelector('.id-btn-group');
-      if(identity){
-        var copy = identity.cloneNode(true);
-        all('button', copy).forEach(function(source, index){
-          var original = all('button', identity)[index];
-          copy.replaceChild(proxyItem(original, txt(source), {
-            title: original && original.title || '切换出站身份'
-          }), source);
-        });
-        panel.appendChild(copy);
-      }
-      all('button', second).forEach(function(source){
-        if(source.closest('.id-btn-group')) return;
-        panel.appendChild(proxyItem(source, txt(source), {
-          danger: /danger/.test(source.className),
-          title: source.title || ''
-        }));
-      });
-      second.classList.add('nextb-row-extra');
-    }
-    row.appendChild(wrap);
-    more.addEventListener('click', function(event){
-      event.stopPropagation();
-      if(wrap.classList.contains('is-open')) closeMenu(wrap);
-      else openMenu(wrap, panel, more);
-    });
-    panel.addEventListener('click', function(event){ event.stopPropagation(); });
-    keep.forEach(function(el){ el.classList.add('nextb-row-keep'); });
-  }
-  function enhanceAccountRows(){
-    all('#accounts td.acct-actions').forEach(addRowMenu);
-    var check = byId('acctSelAll');
-    if(check) check.setAttribute('aria-label', '全选或取消全选当前筛选结果');
-  }
-  function syncDisabledEmpty(){
-    var section = byId('workbuddyDisabledSection');
-    var list = byId('disabledList');
-    var count = byId('disabledCount');
-    if(!section || !list) return;
-    var empty = !txt(list).length || /当前没有禁用的账号或模型/.test(txt(list))
-      || !!(count && /^\(0\)$/.test(txt(count)));
-    section.classList.toggle('next-disabled-empty', empty);
-  }
-
   /* API page ------------------------------------------------------------- */
   function ensureApiGuide(){
     var page = byId('pageApi');
@@ -30738,13 +29676,10 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
     var code = byId('nextbAgentKeyMasked');
     if(!code) return;
     var row = currentKeyRow();
-    if(!row){
-      code.textContent = '尚未加载';
-      return;
-    }
-    code.textContent = row.key || row.stored_key
+    const text = !row ? '尚未加载' : row.key || row.stored_key
       ? '已加载明文，可复制'
       : (row.masked || (row.name ? row.name + '（脱敏）' : '仅脱敏值'));
+    if(code.textContent !== text) code.textContent = text;
   }
   function ensureAgentFooter(){
     var manual = doc.querySelector('#pageAgents .agent-manual-urls');
@@ -30762,23 +29697,11 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
 
   function enhance(){
     pending = false;
-    var tab = currentTab();
-    ensureAccountMenus();
-    ensureBulkBar();
-    enhanceAccountRows();
-    syncBulkBar();
-    syncDisabledEmpty();
     ensureApiGuide();
     enhanceApiDoc();
     ensureAgentStrip();
     ensureAgentFooter();
     syncAgentStrip();
-    if(tab !== lastTab){
-      lastTab = tab;
-      if(tab === 'api' && typeof window.loadExternalApiPage === 'function'){
-        /* The page's own switch already loads it; this only fills a direct hash entry. */
-      }
-    }
   }
   function schedule(){
     if(pending) return;
@@ -30788,21 +29711,11 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
     }, 0);
   }
 
-  on(doc, 'click', function(event){
-    if(!event.target || !event.target.closest || !event.target.closest('.nextb-menu-wrap, .nextb-row-menu-wrap')){
-      closeMenus();
-    }
-  });
-  on(doc, 'keydown', function(event){
-    if(event.key === 'Escape') closeMenus();
-  });
   on(doc, 'change', function(event){
     var target = event.target;
-    if(target && target.classList && target.classList.contains('acct-sel')) schedule();
-    if(target && (target.id === 'agentKeySelect' || target.id === 'poolFilterSelect')) schedule();
+    if(target && target.id === 'agentKeySelect') schedule();
   });
 
-  hookBulkBar();
   hookApiDoc();
 
   if(doc.readyState === 'loading'){
@@ -30814,7 +29727,7 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
     observer = new MutationObserver(function(records){
       for(var i = 0; i < records.length; i++){
         var target = records[i].target;
-        if(target && target.nodeType === 1 && !target.closest('#nextbAccountBulkBar')){
+        if(target && target.nodeType === 1 && target.closest('#pageApi, #pageAgents')){
           schedule();
           return;
         }
@@ -30825,8 +29738,7 @@ if (typeof SORT_DENY_TABLES !== 'undefined' && SORT_DENY_TABLES && SORT_DENY_TAB
   window.addEventListener('hashchange', schedule);
   window.__AGENT_B__ = {
     enhance: enhance,
-    openSettings: openSettings,
-    syncBulkBar: syncBulkBar
+    openSettings: openSettings
   };
 })();
 
