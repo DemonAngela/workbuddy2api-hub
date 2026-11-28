@@ -5,7 +5,7 @@
 - **文本嵌入（PR #45）**：新增默认关闭的 `POST /v1/embeddings`，使用上游 `bge-m3` 并补齐 OpenAI 兼容响应字段。只使用文本号池，遵守每日额度、积分保留线、账号限制、pinned 账号、Key 账号白名单和在飞槽；成功与失败分别记录 `kind="embedding"`。
 - **权限与错误边界**：REST 媒体接口和 `/v1/media/models` 遵守 Key 模型白名单；媒体目录、排队视频任务和参考素材上传遵守 Key 账号白名单，Key 已删除时 fail-closed。Key 出口与模型前缀冲突返回 409，`403 / 11140` 停止换号。
 - **接入导航与面板交互**：`接入` 提升为一级导航，模型调用 Key 下沉到接入页；顶栏新增独立默认出口选择器并保留总览一键切换（PR #40）；传统布局设置分类栏置顶并联动说明（PR #41）；修复设置下拉跳顶、移动端模型页排版和改图 multipart 挂起。
-- **发布运行时**：便携包补齐 `binascii` 与 `_struct` 依赖，避免 Linux 发布资产测试和运行时缺模块。
+- **发布运行时**：便携运行时清单移除不存在的 `binascii.py` / `_struct.pyd` 条目；已用固定 Python 3.12.15 运行时验证 `binascii`、`struct`、`sqlite3`、`ssl`、`hashlib` 导入正常。
 - 全量测试：**324 个套件：245 个 Python + 79 个 JS，324 passed, 0 failed, 0 skipped**。
 
 ## v2.2.7
